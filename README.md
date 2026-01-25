@@ -39,18 +39,20 @@ from .models import Product
 from .forms import ProductForm
 from .filters import ProductFilter
 
-# Table configuration
+# Table configuration with filters
 TABLE_CONFIG = [
     {
         "label": "Name",
         "field": "name",
         "value": lambda obj: obj.name,
         "url": lambda obj: ("app:product_update", {"pk": obj.pk}),
+        "filter_field": product_filter['name'],  # Add filter input to column
     },
     {
         "label": "Price",
         "field": "price",
         "value": lambda obj: f"${obj.price}",
+        # No filter for this column
     },
 ]
 

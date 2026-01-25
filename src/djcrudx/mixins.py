@@ -174,7 +174,7 @@ class CrudListMixin(PaginationMixin, DataTableMixin):
         # Remove or customize this method based on your needs
         return table_config
 
-    def get_datatable_context(self, queryset, filter_instance, table_config, request, view_name=None):
+    def get_datatable_context(self, queryset, filter_instance, table_config, request):
         """
         Complete datatable handling - filtering, pagination, data generation
 
@@ -183,7 +183,6 @@ class CrudListMixin(PaginationMixin, DataTableMixin):
             filter_instance: django-filter instance
             table_config: column configuration
             request: HttpRequest object
-            view_name: view name for personalization
 
         Returns:
             dict: context for template
@@ -218,9 +217,9 @@ class CrudListMixin(PaginationMixin, DataTableMixin):
         if "base_template" not in context:
             context["base_template"] = getattr(settings, 'DJCRUDX_BASE_TEMPLATE', None)
 
-        # Add data for column configuration
-        if view_name:
-            context["view_name"] = view_name
-            context["all_columns"] = [{"key": col.get("key") or col.get("field") or col["label"], "label": col["label"]} for col in table_config]
+        # Add data for column configuration - disabled
+        # if view_name:
+        #     context["view_name"] = view_name
+        #     context["all_columns"] = [{"key": col.get("key") or col.get("field") or col["label"], "label": col["label"]} for col in table_config]
 
         return context

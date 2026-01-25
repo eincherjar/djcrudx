@@ -25,16 +25,19 @@ def product_list(request):
             "field": "name",
             "value": lambda obj: obj.name,
             "url": lambda obj: ("products:product_update", {"pk": obj.pk}),
+            "filter_field": product_filter['name'],  # Add filter to column
         },
         {
             "label": "Price",
             "field": "price",
             "value": lambda obj: f"${obj.price}",
+            # No filter for price column
         },
         {
             "label": "Status",
             "field": "is_active",
             "value": lambda obj: "Active" if obj.is_active else "Inactive",
+            "filter_field": product_filter['is_active'],  # Add filter to column
             "is_badge": True,
             "badge_data": lambda obj: [
                 {
