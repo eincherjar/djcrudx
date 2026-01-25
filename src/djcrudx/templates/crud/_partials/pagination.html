@@ -4,15 +4,15 @@
   <div class="flex flex-1 justify-between sm:hidden">
     {% if page_obj.has_previous %}
     <a href="{{ base_url }}page={{ page_obj.previous_page_number }}"
-      class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{% trans "Previous" %}</a>
+      class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Poprzednia</a>
     {% else %}
-    <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-400">{% trans "Previous" %}</span>
+    <span class="relative inline-flex items-center rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-400">Poprzednia</span>
     {% endif %}
     {% if page_obj.has_next %}
     <a href="{{ base_url }}page={{ page_obj.next_page_number }}"
-      class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{% trans "Next" %}</a>
+      class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Następna</a>
     {% else %}
-    <span class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-400">{% trans "Next" %}</span>
+    <span class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-400">Następna</span>
     {% endif %}
   </div>
 
@@ -20,7 +20,7 @@
   <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
     <!-- Left: per page options -->
     <div class="flex items-center space-x-2">
-      <span class="text-sm text-gray-700">{% trans "Show:" %}</span>
+      <span class="text-sm text-gray-700">Pokaż:</span>
       {% for option in per_page_options %}
       {% if option == current_per_page %}
       <span class="relative inline-flex items-center px-3 py-1 bg-indigo-600 text-white text-sm font-semibold rounded-md">{{ option }}</span>
@@ -34,7 +34,7 @@
     <!-- Center: showing info -->
     <div>
       <p class="text-sm text-gray-700">
-        {% blocktrans "Showing {start} to {end} of {total} results" start=start_index end=end_index total=total_count %}
+        {% trans "Showing" %} {{ start_index }} {% trans "to" %} {{ end_index }} {% trans "of" %} {{ total_count }} {% trans "results" %}
       </p>
     </div>
 
