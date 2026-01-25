@@ -58,6 +58,13 @@ class PaginationMixin:
         pagination_context = {
             "page_obj": page_obj,
             "request_get": request.GET,
+            "per_page_options": [10, 25, 50, 100],
+            "current_per_page": per_page,
+            "start_index": page_obj.start_index() if page_obj.object_list else 0,
+            "end_index": page_obj.end_index() if page_obj.object_list else 0,
+            "total_count": paginator.count,
+            "base_url": f"{request.path}?",
+            "per_page_base_url": f"{request.path}?",
         }
 
         return page_obj, pagination_context
