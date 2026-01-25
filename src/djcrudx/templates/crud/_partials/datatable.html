@@ -62,9 +62,9 @@
 				<span>Wyczyść filtry</span>
 			</a>
 
-			<!-- Column config and views group -->
+			<!-- Column config -->
 			<div class="relative inline-flex ml-8">
-				<button onclick="openColumnConfig()" class="px-3 py-1 bg-blue-500 text-white text-xs rounded-l hover:bg-blue-600 flex items-center gap-2">
+				<button onclick="openColumnConfig()" class="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600 flex items-center gap-2">
 					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
 						stroke-linejoin="round" class="size-4">
 						<path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -78,19 +78,8 @@
 						<path d="M18 4l0 1" />
 						<path d="M18 9l0 11" />
 					</svg>
+					Kolumny
 				</button>
-				<button onclick="toggleViewsDropdown()" class="px-2 py-1 bg-blue-500 text-white text-xs rounded-r hover:bg-blue-600 border-l border-blue-400 cursor-pointer">
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-					</svg>
-				</button>
-
-				<!-- Views dropdown -->
-				<div id="viewsDropdown" class="absolute top-full right-0 mt-1 w-48 bg-white border border-gray-200 rounded shadow-lg z-10 hidden cursor-pointer">
-					<div class="py-1" id="viewsList">
-						<div class="px-3 py-2 text-xs text-gray-500">Ładowanie...</div>
-					</div>
-				</div>
 			</div>
 		</div>
 	</div>
@@ -99,9 +88,9 @@
 		// Focus synchronization for search input and button
 		document.addEventListener('DOMContentLoaded', function () {
 			// Set view name for column config
-			if (typeof viewName !== 'undefined') {
+			if (typeof viewName !== 'undefined' && viewName) {
 				window.viewName = viewName;
-				loadSavedViews();
+				// loadSavedViews(); // Wyłączone - wymaga dodatkowych URL-i i modeli
 			}
 
 			const searchInput = document.getElementById('searchInput');
