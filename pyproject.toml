@@ -1,0 +1,74 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "djcrudx"
+version = "0.1.0"
+description = "Universal Django CRUD library with advanced widgets and features"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "DjCrudX Team", email = "contact@djcrudx.com"}
+]
+keywords = ["django", "crud", "widgets", "forms", "admin"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Framework :: Django",
+    "Framework :: Django :: 4.0",
+    "Framework :: Django :: 4.1",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "Django>=4.0",
+    "django-filter>=22.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-django>=4.5", 
+    "black>=22.0",
+    "flake8>=5.0",
+    "build>=0.8",
+    "twine>=4.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/djcrudx/djcrudx"
+Repository = "https://github.com/djcrudx/djcrudx"
+Issues = "https://github.com/djcrudx/djcrudx/issues"
+Documentation = "https://github.com/djcrudx/djcrudx#readme"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/djcrudx"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/README.md",
+    "/LICENSE",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=7.0",
+    "pytest-django>=4.5", 
+    "black>=22.0",
+    "flake8>=5.0",
+    "build>=0.8",
+    "twine>=4.0",
+]

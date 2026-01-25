@@ -1,0 +1,584 @@
+{% load static %}
+
+<div class="datatable-wrapper flex-1 flex flex-col">
+	{% csrf_token %}
+	{% if view_name %}
+	<script>var viewName = '{{ view_name }}';</script>
+	{% endif %}
+	{% if all_columns %}
+	<script>var allColumns = {{ all_columns| safe }};</script>
+	{% endif %}
+	<!-- Top section with search and filter controls -->
+	<div class="flex justify-between items-center mb-4">
+		<!-- Search -->
+		<div class="flex items-center">
+			<div class="flex">
+				<input id="searchInput" type="search" placeholder="{{ search_placeholder }}"
+					class="border border-gray-300 rounded-l px-3 py-1 text-xs w-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+					value="{{ request_get.search|default:'' }}" onkeyup="if(event.key==='Enter') { performSearch() }">
+				<button onclick="performSearch()"
+					class="bg-yellow-500 text-white px-3 py-1 text-xs rounded-r hover:bg-yellow-600 border border-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+						stroke-linejoin="round" class="size-4">
+						<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+						<path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+						<path d="M21 21l-6 -6" />
+					</svg>
+				</button>
+			</div>
+		</div>
+
+		<!-- Filter controls -->
+		<div class="flex items-center space-x-2">
+			<!-- Scroll arrows -->
+			<div class="flex items-center space-x-1">
+				<button id="scrollLeft" class="p-1 bg-white shadow rounded border border-gray-300">
+					<svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+					</svg>
+				</button>
+				<button id="scrollRight" class="p-1 bg-white shadow rounded border border-gray-300">
+					<svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+					</svg>
+				</button>
+			</div>
+
+			<button onclick="applyFilters()" class="px-3 py-1 bg-yellow-500 text-white text-xs rounded hover:bg-yellow-600 flex items-center gap-2 cursor-pointer">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+					stroke-linejoin="round" class="size-4">
+					<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+					<path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227" />
+				</svg>
+				<span>Zastosuj filtry</span>
+			</button>
+			<a href="{{ request.path }}" class="px-3 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600 flex items-center gap-2">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+					stroke-linejoin="round" class="size-4">
+					<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+					<path d="M8 4h12v2.172a2 2 0 0 1 -.586 1.414l-3.914 3.914m-.5 3.5v4l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227" />
+					<path d="M3 3l18 18" />
+				</svg>
+				<span>Wyczyść filtry</span>
+			</a>
+
+			<!-- Column config and views group -->
+			<div class="relative inline-flex ml-8">
+				<button onclick="openColumnConfig()" class="px-3 py-1 bg-blue-500 text-white text-xs rounded-l hover:bg-blue-600 flex items-center gap-2">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+						stroke-linejoin="round" class="size-4">
+						<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+						<path d="M4 8h4v4h-4l0 -4" />
+						<path d="M6 4l0 4" />
+						<path d="M6 12l0 8" />
+						<path d="M10 14h4v4h-4l0 -4" />
+						<path d="M12 4l0 10" />
+						<path d="M12 18l0 2" />
+						<path d="M16 5h4v4h-4l0 -4" />
+						<path d="M18 4l0 1" />
+						<path d="M18 9l0 11" />
+					</svg>
+				</button>
+				<button onclick="toggleViewsDropdown()" class="px-2 py-1 bg-blue-500 text-white text-xs rounded-r hover:bg-blue-600 border-l border-blue-400 cursor-pointer">
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+					</svg>
+				</button>
+
+				<!-- Views dropdown -->
+				<div id="viewsDropdown" class="absolute top-full right-0 mt-1 w-48 bg-white border border-gray-200 rounded shadow-lg z-10 hidden cursor-pointer">
+					<div class="py-1" id="viewsList">
+						<div class="px-3 py-2 text-xs text-gray-500">Ładowanie...</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// Focus synchronization for search input and button
+		document.addEventListener('DOMContentLoaded', function () {
+			// Set view name for column config
+			if (typeof viewName !== 'undefined') {
+				window.viewName = viewName;
+				loadSavedViews();
+			}
+
+			const searchInput = document.getElementById('searchInput');
+			const searchButton = searchInput.nextElementSibling;
+
+			searchInput.addEventListener('focus', function () {
+				searchButton.classList.add('ring-2', 'ring-yellow-500');
+			});
+
+			searchInput.addEventListener('blur', function () {
+				searchButton.classList.remove('ring-2', 'ring-yellow-500');
+			});
+
+			// Dodaj obsługę Enter dla wszystkich inputów filtrów - używaj delegacji zdarzeń
+			document.addEventListener('keyup', function (event) {
+				// Sprawdź czy to input w nagłówku tabeli
+				if (event.key === 'Enter' && event.target.matches('thead input[type="text"], thead input[type="search"], thead input')) {
+					applyFilters();
+				}
+			});
+
+			// Obsługa change dla select i radio
+			document.addEventListener('change', function (event) {
+				if (event.target.matches('thead select, thead input[type="radio"]')) {
+					applyFilters();
+				}
+			});
+
+			// Zamknij dropdown przy kliknięciu poza nim
+			document.addEventListener('click', function (event) {
+				const dropdown = document.getElementById('viewsDropdown');
+				const button = event.target.closest('.relative.inline-flex');
+				if (!button && !dropdown.classList.contains('hidden')) {
+					dropdown.classList.add('hidden');
+				}
+			});
+		});
+
+		function loadSavedViews() {
+			if (!window.viewName) return;
+
+			fetch(`/accounts/get-table-views/${window.viewName}/`)
+				.then(response => response.json())
+				.then(data => {
+					const viewsList = document.getElementById('viewsList');
+					viewsList.innerHTML = '';
+
+					if (data.views.length === 0) {
+						viewsList.innerHTML = '<div class="px-3 py-2 text-xs text-gray-500">Brak zapisanych widoków</div>';
+						return;
+					}
+
+					// Znajdź i załaduj widok domyślny
+					const defaultView = data.views.find(view => view.is_default);
+					if (defaultView) {
+						loadView(defaultView.id);
+					}
+
+					data.views.forEach(view => {
+						const item = document.createElement('div');
+						item.className = 'flex items-center justify-between px-3 py-2 hover:bg-gray-100';
+
+						const button = document.createElement('button');
+						button.className = 'flex-1 text-left text-xs cursor-pointer';
+						button.textContent = view.display_name + (view.is_default ? ' (domyślny)' : '');
+						button.onclick = () => loadView(view.id);
+
+						const deleteBtn = document.createElement('button');
+						deleteBtn.className = 'ml-2 p-1 text-red-500 hover:text-red-700 cursor-pointer';
+						deleteBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>';
+						deleteBtn.onclick = (e) => {
+							e.stopPropagation();
+							deleteView(view.id, view.display_name);
+						};
+
+						item.appendChild(button);
+						item.appendChild(deleteBtn);
+						viewsList.appendChild(item);
+					});
+				})
+				.catch(error => console.error('Błąd ładowania widoków:', error));
+		}
+
+		function toggleViewsDropdown() {
+			const dropdown = document.getElementById('viewsDropdown');
+			dropdown.classList.toggle('hidden');
+		}
+
+		function loadView(viewId) {
+			fetch(`/accounts/load-table-view/${viewId}/`)
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						applyColumnConfig(data.view.column_config);
+						document.getElementById('viewsDropdown').classList.add('hidden');
+					}
+				})
+				.catch(error => console.error('Błąd ładowania widoku:', error));
+		}
+
+		function deleteView(viewId, viewName) {
+			// Pokaż modal potwierdzenia
+			const modal = document.getElementById('deleteModal');
+			const viewNameSpan = document.getElementById('deleteViewName');
+			const confirmBtn = document.getElementById('confirmDelete');
+
+			viewNameSpan.textContent = viewName;
+			modal.classList.remove('hidden');
+
+			// Ustaw obsługę potwierdzenia
+			confirmBtn.onclick = () => {
+				const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+
+				fetch(`/accounts/delete-table-view/${viewId}/`, {
+					method: 'POST',
+					headers: {
+						'X-CSRFToken': csrfToken
+					}
+				})
+					.then(response => response.json())
+					.then(data => {
+						if (data.success) {
+							loadSavedViews();
+							modal.classList.add('hidden');
+						} else {
+							alert('Błąd podczas usuwania widoku');
+						}
+					})
+					.catch(error => {
+						console.error('Błąd:', error);
+						alert('Błąd podczas usuwania widoku');
+					});
+			};
+		}
+
+		function closeDeleteModal() {
+			document.getElementById('deleteModal').classList.add('hidden');
+		}
+
+		// Przechowuj oryginalne kolumny
+		let originalTableState = null;
+
+		function saveOriginalTableState() {
+			const table = document.querySelector('table');
+			if (!table || originalTableState) return;
+
+			const thead = table.querySelector('thead tr');
+			const tbody = table.querySelector('tbody');
+
+			originalTableState = {
+				headers: Array.from(thead.children).map(h => h.cloneNode(true)),
+				rows: Array.from(tbody.children).map(row =>
+					Array.from(row.children).map(cell => cell.cloneNode(true))
+				)
+			};
+		}
+
+		function applyColumnConfig(config) {
+			const table = document.querySelector('table');
+			if (!table) return;
+
+			const thead = table.querySelector('thead tr');
+			const tbody = table.querySelector('tbody');
+
+			if (!thead || !tbody) return;
+
+			// Zapisz oryginalny stan przy pierwszym użyciu
+			if (!originalTableState) {
+				saveOriginalTableState();
+			}
+
+			// Przywróć wszystkie oryginalne kolumny
+			thead.innerHTML = '';
+			originalTableState.headers.forEach(header => {
+				thead.appendChild(header.cloneNode(true));
+			});
+
+			Array.from(tbody.children).forEach((row, rowIndex) => {
+				row.innerHTML = '';
+				if (originalTableState.rows[rowIndex]) {
+					originalTableState.rows[rowIndex].forEach(cell => {
+						row.appendChild(cell.cloneNode(true));
+					});
+				}
+			});
+
+			// Teraz zastosuj konfigurację
+			const currentHeaders = Array.from(thead.children);
+			const currentRows = Array.from(tbody.children);
+
+			// Mapuj klucze z konfiguracji na rzeczywiste indeksy kolumn
+			const keyToIndexMap = {};
+			currentHeaders.forEach((header, index) => {
+				const key = header.dataset.key;
+				if (key) {
+					keyToIndexMap[key] = index;
+				}
+			});
+
+			// Sortuj konfigurację według order
+			const sortedConfig = [...config].sort((a, b) => a.order - b.order);
+
+			// Wyczyść nagłówki
+			thead.innerHTML = '';
+
+			// Dodaj nagłówki w nowej kolejności
+			sortedConfig.forEach(col => {
+				const originalIndex = keyToIndexMap[col.key];
+				const header = currentHeaders[originalIndex];
+				if (header) {
+					header.style.display = col.visible !== false ? '' : 'none';
+					thead.appendChild(header);
+				}
+			});
+
+			// Przebuduj wiersze
+			currentRows.forEach(row => {
+				const originalCells = Array.from(row.children);
+				row.innerHTML = '';
+
+				sortedConfig.forEach(col => {
+					const originalIndex = keyToIndexMap[col.key];
+					const cell = originalCells[originalIndex];
+					if (cell) {
+						cell.style.display = col.visible !== false ? '' : 'none';
+						row.appendChild(cell);
+					}
+				});
+			});
+
+			// Aktualizuj strzałki przewijania po zmianie widoku
+			const container = document.getElementById('tableContainer');
+			if (container && window.updateArrows) {
+				setTimeout(() => window.updateArrows(), 100);
+			}
+		}
+
+		function performSearch() {
+			const searchInput = document.getElementById('searchInput');
+			const searchValue = searchInput.value;
+			window.location.href = '?search=' + encodeURIComponent(searchValue) + '{% if request_get %}{% for key, value in request_get.items %}{% if key != "search" and key != "page" %}&{{ key }}={{ value }}{% endif %}{% endfor %}{% endif %}';
+		}
+
+		function applyFilters() {
+			const form = document.createElement('form');
+			form.method = 'GET';
+
+			// Zbierz wszystkie filtry z nagłówków tabeli
+			const filterInputs = document.querySelectorAll('thead select, thead input[type="text"], thead input[type="search"], thead input[type="date"], thead input[type="checkbox"]:checked, thead input[type="radio"]:checked');
+
+			filterInputs.forEach(input => {
+				if (input.name && (input.value || input.type === 'checkbox' || input.type === 'radio')) {
+					const hiddenInput = document.createElement('input');
+					hiddenInput.type = 'hidden';
+					hiddenInput.name = input.name;
+					hiddenInput.value = input.value;
+					form.appendChild(hiddenInput);
+				}
+			});
+
+			// Zachowaj per_page
+			const perPageSelect = document.querySelector('select[name="per-page"]');
+			if (perPageSelect && perPageSelect.value) {
+				const hiddenInput = document.createElement('input');
+				hiddenInput.type = 'hidden';
+				hiddenInput.name = 'per_page';
+				hiddenInput.value = perPageSelect.value;
+				form.appendChild(hiddenInput);
+			}
+
+			console.log('Filtry do wysłania:', Array.from(form.elements).map(e => `${e.name}=${e.value}`));
+			document.body.appendChild(form);
+			form.submit();
+		}
+	</script>
+
+	<!-- Table -->
+	<div class="flex-1 flex flex-col">
+		<div id="tableContainer" class="flex-1 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+			<div class="border border-gray-200 rounded-lg">
+				<table class="min-w-full divide-y divide-gray-200">
+					<thead class="bg-gray-50">
+						<tr>
+							{% for header in headers %}
+							<th class="p-2 text-left text-xs font-normal text-gray-500 uppercase align-top" data-key="{{ header.key|default:'' }}">
+								<div class="flex flex-col space-y-2 items-start">
+									<!-- Nagłówek z sortowaniem -->
+									{% if header.field %}
+									<a href="?ordering={% if request_get.ordering == header.field %}-{% endif %}{{ header.field }}{% if request_get %}{% for key, value in request_get.items %}{% if key != 'ordering' and key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}{% endif %}"
+										class="flex items-center space-x-1 hover:text-gray-700 whitespace-nowrap {% if request_get.ordering == header.field or request_get.ordering == '-'|add:header.field %}text-yellow-600 font-semibold{% endif %}">
+										<span>{{ header.label }}</span>
+										{% if request_get.ordering == header.field %}
+										<!-- Sortowanie rosnąco -->
+										<svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+										</svg>
+										{% elif request_get.ordering == '-'|add:header.field %}
+										<!-- Sortowanie malejąco -->
+										<svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+										</svg>
+										{% else %}
+										<!-- Brak sortowania -->
+										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 15 4 4 4-4m0-6-4-4-4 4"></path>
+										</svg>
+										{% endif %}
+									</a>
+									{% else %}
+									<span class="flex items-center space-x-1 whitespace-nowrap">
+										<span>{{ header.label }}</span>
+									</span>
+									{% endif %}
+
+									<!-- Filtr -->
+									{% if header.filter_field %}
+									<div class="min-w-full">
+										{{ header.filter_field }}
+									</div>
+									{% endif %}
+								</div>
+							</th>
+							{% endfor %}
+						</tr>
+					</thead>
+					<tbody class="bg-white divide-y divide-gray-200">
+						{% for row in rows %}
+						<tr class="hover:bg-gray-50">
+							{% for cell in row %}
+							<td class="px-6 py-4 whitespace-nowrap text-xs text-gray-900 max-w-xs">
+								<div class="flex flex-wrap gap-1">
+								{% if cell.is_badge and cell.bg_color and cell.txt_color %}
+								<span class="px-2 py-1 rounded text-xs bg-[{{ cell.bg_color }}] text-[{{ cell.txt_color }}]">{{ cell.name }}</span>
+								{% else %}
+								{{ cell|safe }}
+								{% endif %}
+								</div>
+							</td>
+							{% endfor %}
+						</tr>
+						{% empty %}
+						<tr>
+							<td colspan="{{ headers|length }}" class="px-6 py-4 text-center text-xs text-gray-500">
+								Brak danych do wyświetlenia
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		<!-- Bottom section with pagination -->
+		{% if page_obj %}
+		<div class="mt-4 flex-shrink-0">
+			{% include "_partials/simple_pagination.html" %}
+		</div>
+		{% endif %}
+	</div>
+
+	<script>
+		// Table scroll arrows functionality
+		document.addEventListener('DOMContentLoaded', function () {
+			const container = document.getElementById('tableContainer');
+			const leftArrow = document.getElementById('scrollLeft');
+			const rightArrow = document.getElementById('scrollRight');
+
+			function updateArrows() {
+				const canScrollLeft = container.scrollLeft > 0;
+				const canScrollRight = container.scrollLeft < (container.scrollWidth - container.clientWidth);
+
+				// Disable/enable buttons instead of hiding
+				leftArrow.disabled = !canScrollLeft;
+				rightArrow.disabled = !canScrollRight;
+
+				// Update visual state
+				if (canScrollLeft) {
+					leftArrow.classList.remove('opacity-50', 'cursor-not-allowed');
+					leftArrow.classList.add('hover:bg-gray-50', 'cursor-pointer');
+				} else {
+					leftArrow.classList.add('opacity-50', 'cursor-not-allowed');
+					leftArrow.classList.remove('hover:bg-gray-50', 'cursor-pointer');
+				}
+
+				if (canScrollRight) {
+					rightArrow.classList.remove('opacity-50', 'cursor-not-allowed');
+					rightArrow.classList.add('hover:bg-gray-50', 'cursor-pointer');
+				} else {
+					rightArrow.classList.add('opacity-50', 'cursor-not-allowed');
+					rightArrow.classList.remove('hover:bg-gray-50', 'cursor-pointer');
+				}
+			}
+
+			// Udostępnij globalnie
+			window.updateArrows = updateArrows;
+
+			// Initial check
+			updateArrows();
+
+			// Update on scroll
+			container.addEventListener('scroll', updateArrows);
+
+			// Update on resize
+			window.addEventListener('resize', updateArrows);
+
+			// Arrow click handlers
+			leftArrow.addEventListener('click', function () {
+				if (!this.disabled) {
+					container.scrollBy({ left: -200, behavior: 'smooth' });
+				}
+			});
+
+			rightArrow.addEventListener('click', function () {
+				if (!this.disabled) {
+					container.scrollBy({ left: 200, behavior: 'smooth' });
+				}
+			});
+		});
+	</script>
+</div>
+
+<!-- Column Configuration Modal -->
+<div id="columnModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+	<div class="flex items-center justify-center min-h-screen p-4">
+		<div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+			<div class="flex justify-between items-center p-4 border-b">
+				<h3 class="text-lg font-semibold">Konfiguracja kolumn</h3>
+				<button onclick="closeColumnConfig()" class="text-gray-400 hover:text-gray-600">
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+					</svg>
+				</button>
+			</div>
+			<div class="p-4">
+				<div id="columnList" class="space-y-2 max-h-60 overflow-y-auto cursor-pointer">
+					<!-- Columns will be populated by JavaScript -->
+				</div>
+				<div class="mt-4 pt-4 border-t">
+					<input type="text" id="viewName" placeholder="Nazwa widoku" class="w-full px-3 py-2 border border-gray-300 rounded text-xs mb-3">
+					<label class="flex items-center mb-3">
+						<input type="checkbox" id="isDefault" class="mr-2">
+						<span class="text-xs">Ustaw jako widok domyślny</span>
+					</label>
+					<div class="flex space-x-2">
+						<button onclick="saveView()" class="flex-1 px-3 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600">Zapisz widok</button>
+						<button onclick="resetColumns()" class="flex-1 px-3 py-2 bg-gray-500 text-white text-sm rounded hover:bg-gray-600">Reset</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+	<div class="flex items-center justify-center min-h-screen p-4">
+		<div class="bg-white rounded-lg shadow-xl max-w-sm w-full">
+			<div class="p-4">
+				<div class="flex items-center mb-4">
+					<svg class="w-6 h-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+							d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+					</svg>
+					<h3 class="text-lg font-semibold text-gray-900">Usuń widok</h3>
+				</div>
+				<p class="text-sm text-gray-600 mb-4">
+					Czy na pewno chcesz usunąć widok <strong id="deleteViewName"></strong>?
+				</p>
+				<div class="flex space-x-2">
+					<button onclick="closeDeleteModal()" class="flex-1 px-3 py-2 bg-gray-300 text-gray-700 text-sm rounded hover:bg-gray-400">
+						Anuluj
+					</button>
+					<button id="confirmDelete" class="flex-1 px-3 py-2 bg-red-500 text-white text-sm rounded hover:bg-red-600">
+						Usuń
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

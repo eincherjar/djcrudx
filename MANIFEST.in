@@ -1,0 +1,14 @@
+include README.md
+include LICENSE
+include pyproject.toml
+recursive-include src/djcrudx/templates *
+recursive-include src/djcrudx/static *
+recursive-include src/djcrudx/templatetags *
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * .DS_Store
+recursive-exclude * *.egg-info
+prune build
+prune dist
+prune examples
+prune docs

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">{{ page_heading|default:page_title }}</h1>
+            <p class="text-gray-600 mt-1">{{ page_description|default:"" }}</p>
+        </div>
+        <div class="flex space-x-3">
+            <a href="{% url back_url %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left mr-2"></i>Powrót
+            </a>
+            {% if edit_url %}
+            <a href="{% url edit_url pk=object.pk %}" class="btn btn-primary">
+                <i class="fas fa-edit mr-2"></i>Edytuj
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Detail Content -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for config in detail_config %}
+                    {% if not config.is_badge %}
+                    <div class="space-y-1">
+                        <dt class="text-sm font-medium text-gray-500">{{ config.label }}</dt>
+                        <dd class="text-sm text-gray-900">
+                            {% with value=config.value|call_with:object %}
+                                {% if config.url %}
+                                    {% with url_data=config.url|call_with:object %}
+                                    <a href="{% url url_data.0 pk=url_data.1.pk %}" class="text-blue-600 hover:text-blue-800">
+                                        {{ value }}
+                                    </a>
+                                    {% endwith %}
+                                {% else %}
+                                    {{ value|default:"-" }}
+                                {% endif %}
+                            {% endwith %}
+                        </dd>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <!-- Badge fields -->
+            {% for config in detail_config %}
+                {% if config.is_badge %}
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <dt class="text-sm font-medium text-gray-500 mb-3">{{ config.label }}</dt>
+                    <dd class="flex flex-wrap gap-2">
+                        {% with badges=config.badge_data|call_with:object %}
+                            {% for badge in badges %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{{ badge.background_color }} text-{{ badge.text_color }}">
+                                {{ badge.name }}
+                            </span>
+                            {% empty %}
+                            <span class="text-gray-500 text-sm">-</span>
+                            {% endfor %}
+                        {% endwith %}
+                    </dd>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
