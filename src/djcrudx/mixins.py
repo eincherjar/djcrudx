@@ -201,8 +201,8 @@ class CrudListMixin(PaginationMixin, DataTableMixin):
 
         context = {
             "filter": filter_instance,
-            "table_headers": table_headers,
-            "table_rows": table_rows,
+            "headers": table_headers,
+            "rows": table_rows,
             **pagination_context,
         }
 
