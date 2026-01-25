@@ -216,6 +216,17 @@ class CrudListMixin(PaginationMixin, DataTableMixin):
         # Dodaj base_template tylko jeśli nie został już ustawiony
         if "base_template" not in context:
             context["base_template"] = getattr(settings, 'DJCRUDX_BASE_TEMPLATE', None)
+            
+        # Dodaj kolory UI
+        context["ui_colors"] = getattr(settings, 'DJCRUDX_UI_COLORS', {
+            'primary': 'yellow-500',
+            'primary_hover': 'yellow-600',
+            'primary_text': 'yellow-600',
+            'primary_ring': 'yellow-500',
+            'primary_border': 'yellow-500',
+            'secondary': 'gray-500',
+            'secondary_hover': 'gray-600'
+        })
 
         # Add data for column configuration - disabled
         # if view_name:

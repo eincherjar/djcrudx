@@ -128,6 +128,17 @@ DjCrudX allows flexible template customization:
 ```python
 # Use your own base template globally
 DJCRUDX_BASE_TEMPLATE = "your_base.html"
+
+# Customize UI colors
+DJCRUDX_UI_COLORS = {
+    'primary': 'blue-500',
+    'primary_hover': 'blue-600', 
+    'primary_text': 'blue-600',
+    'primary_ring': 'blue-500',
+    'primary_border': 'blue-500',
+    'secondary': 'slate-500',
+    'secondary_hover': 'slate-600'
+}
 ```
 
 **Per-view configuration:**

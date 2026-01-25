@@ -14,10 +14,10 @@
 		<div class="flex items-center">
 			<div class="flex">
 				<input id="searchInput" type="search" placeholder="{{ search_placeholder }}"
-					class="border border-gray-300 rounded-l px-3 py-1 text-xs w-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+					class="border border-gray-300 rounded-l px-3 py-1 text-xs w-lg focus:outline-none focus:ring-2 focus:ring-{{ ui_colors.primary_ring }} focus:border-{{ ui_colors.primary_border }}"
 					value="{{ request_get.search|default:'' }}" onkeyup="if(event.key==='Enter') { performSearch() }">
 				<button onclick="performSearch()"
-					class="bg-yellow-500 text-white px-3 py-1 text-xs rounded-r hover:bg-yellow-600 border border-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+					class="bg-{{ ui_colors.primary }} text-white px-3 py-1 text-xs rounded-r hover:bg-{{ ui_colors.primary_hover }} border border-{{ ui_colors.primary_border }} focus:outline-none focus:ring-2 focus:ring-{{ ui_colors.primary_ring }}">
 					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
 						stroke-linejoin="round" class="size-4">
 						<path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -44,7 +44,7 @@
 				</button>
 			</div>
 
-			<button onclick="applyFilters()" class="px-3 py-1 bg-yellow-500 text-white text-xs rounded hover:bg-yellow-600 flex items-center gap-2 cursor-pointer">
+			<button onclick="applyFilters()" class="px-3 py-1 bg-{{ ui_colors.primary }} text-white text-xs rounded hover:bg-{{ ui_colors.primary_hover }} flex items-center gap-2 cursor-pointer">
 				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
 					stroke-linejoin="round" class="size-4">
 					<path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -52,7 +52,7 @@
 				</svg>
 				<span>Zastosuj filtry</span>
 			</button>
-			<a href="{{ request.path }}" class="px-3 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600 flex items-center gap-2">
+			<a href="{{ request.path }}" class="px-3 py-1 bg-{{ ui_colors.secondary }} text-white text-xs rounded hover:bg-{{ ui_colors.secondary_hover }} flex items-center gap-2">
 				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
 					stroke-linejoin="round" class="size-4">
 					<path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -77,11 +77,11 @@
 			const searchButton = searchInput.nextElementSibling;
 
 			searchInput.addEventListener('focus', function () {
-				searchButton.classList.add('ring-2', 'ring-yellow-500');
+				searchButton.classList.add('ring-2', 'ring-{{ ui_colors.primary_ring }}');
 			});
 
 			searchInput.addEventListener('blur', function () {
-				searchButton.classList.remove('ring-2', 'ring-yellow-500');
+				searchButton.classList.remove('ring-2', 'ring-{{ ui_colors.primary_ring }}');
 			});
 
 			// Dodaj obsługę Enter dla wszystkich inputów filtrów - używaj delegacji zdarzeń
@@ -360,16 +360,16 @@
 									<!-- Nagłówek z sortowaniem -->
 									{% if header.field %}
 									<a href="?ordering={% if request_get.ordering == header.field %}-{% endif %}{{ header.field }}{% if request_get %}{% for key, value in request_get.items %}{% if key != 'ordering' and key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}{% endif %}"
-										class="flex items-center space-x-1 hover:text-gray-700 whitespace-nowrap {% if request_get.ordering == header.field or request_get.ordering == '-'|add:header.field %}text-yellow-600 font-semibold{% endif %}">
+										class="flex items-center space-x-1 hover:text-gray-700 whitespace-nowrap {% if request_get.ordering == header.field or request_get.ordering == '-'|add:header.field %}text-{{ ui_colors.primary_text }} font-semibold{% endif %}">
 										<span>{{ header.label }}</span>
 										{% if request_get.ordering == header.field %}
 										<!-- Sortowanie rosnąco -->
-										<svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<svg class="w-4 h-4 text-{{ ui_colors.primary_text }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
 										</svg>
 										{% elif request_get.ordering == '-'|add:header.field %}
 										<!-- Sortowanie malejąco -->
-										<svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<svg class="w-4 h-4 text-{{ ui_colors.primary_text }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
 										</svg>
 										{% else %}
