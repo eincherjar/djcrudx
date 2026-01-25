@@ -69,7 +69,8 @@ crud = create_crud(Product, ProductForm, ProductFilter)
 product_list = crud['list'](
     TABLE_CONFIG,
     page_title="Products",
-    create_url="app:product_create"
+    create_url="app:product_create",
+    base_template="admin_base.html"  # Optional: custom base template
 )
 
 product_create = crud['create'](
@@ -113,6 +114,44 @@ urlpatterns = [
     path('products/<int:pk>/', product_detail, name='product_detail'),
     path('products/<int:pk>/delete/', product_delete, name='product_delete'),
 ]
+```
+
+## 🎨 Template Customization
+
+DjCrudX allows flexible template customization:
+
+### Base Template Configuration
+
+**Global configuration (settings.py):**
+```python
+# Use your own base template globally
+DJCRUDX_BASE_TEMPLATE = "your_base.html"
+```
+
+**Per-view configuration:**
+```python
+# In your view
+context.update({
+    "base_template": "special_base.html",  # Overrides global setting
+})
+```
+
+**Priority order:**
+1. View context (`base_template` in context) - highest
+2. Settings (`DJCRUDX_BASE_TEMPLATE`)
+3. Default (`crud/base.html`) - fallback
+
+### Template Override
+
+You can also override any template by creating the same path in your project:
+```
+your_project/
+├── templates/
+│   └── crud/
+│       ├── base.html          # Your custom base
+│       ├── list_view.html     # Custom list view
+│       └── _partials/
+│           └── pagination.html # Custom pagination
 ```
 
 ## 🌍 Internationalization
@@ -239,6 +278,16 @@ DjCrudX templates include Tailwind CSS and Alpine.js via CDN:
 ```
 
 If you prefer to use your own Tailwind CSS setup, you can override the base template.
+
+## 🔧 Fixed Issues
+
+- ✅ Fixed pagination template path (`simple_pagination.html` → `pagination.html`)
+- ✅ Fixed template variable names (`table_headers/table_rows` → `headers/rows`)
+- ✅ Fixed import error in templatetags (`auto_translate` → `smart_translate`)
+- ✅ Fixed missing pagination context variables
+- ✅ Removed non-functional table views and column config buttons
+- ✅ Added configurable base template support
+- ✅ Fixed Polish translations in pagination
 
 ## 📝 License
 
