@@ -1,6 +1,7 @@
 from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.apps import apps
+from django.conf import settings
 
 
 def render_with_readonly(request, template_name, context, readonly_fields=None):
@@ -212,6 +213,10 @@ class CrudListMixin(PaginationMixin, DataTableMixin):
             "rows": table_rows,
             **pagination_context,
         }
+        
+        # Dodaj base_template tylko jeśli nie został już ustawiony
+        if "base_template" not in context:
+            context["base_template"] = getattr(settings, 'DJCRUDX_BASE_TEMPLATE', None)
 
         # Add data for column configuration
         if view_name:
