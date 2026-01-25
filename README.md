@@ -46,7 +46,7 @@ TABLE_CONFIG = [
         "field": "name",
         "value": lambda obj: obj.name,
         "url": lambda obj: ("app:product_update", {"pk": obj.pk}),
-        "filter_field": product_filter['name'],  # Add filter input to column
+        "filter_field": product_filter.form['name'],  # Add filter input to column
     },
     {
         "label": "Price",
