@@ -2,6 +2,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.apps import apps
 from django.conf import settings
+from django.forms import inlineformset_factory
 
 
 def add_base_template_context(context):
@@ -11,15 +12,79 @@ def add_base_template_context(context):
     return context
 
 
-def render_with_readonly(request, template_name, context, readonly_fields=None):
-    """Render with automatic readonly fields application"""
+def render_with_readonly(request, template_name, context, readonly_fields=None, inline_config=None):
+    """
+    Universal render function for forms with automatic features
+    
+    Args:
+        request: HttpRequest
+        template_name: Template path
+        context: Template context
+        readonly_fields: List of readonly field names
+        inline_config: List of inline formset configurations
+        
+    Example:
+        # Simple form
+        return render_with_readonly(request, 'crud/form_view.html', context)
+        
+        # Form with readonly fields
+        return render_with_readonly(request, 'crud/form_view.html', context, 
+                                   readonly_fields=['created_at', 'id'])
+        
+        # Form with inline formsets
+        return render_with_readonly(request, 'crud/form_view.html', context,
+                                   inline_config=[{
+                                       'name': 'employees',
+                                       'parent_model': Organization,
+                                       'child_model': Employee,
+                                       'fields': ['user', 'code', 'position'],
+                                       'extra': 3,
+                                       'can_delete': True
+                                   }])
+        
+        # Form with both readonly and inlines
+        return render_with_readonly(request, 'crud/form_view.html', context,
+                                   readonly_fields=['created_at'],
+                                   inline_config=inline_config)
+    """
+    # Add base template
     context = add_base_template_context(context)
+    
+    # Handle readonly fields
     if readonly_fields and "form" in context:
         form = context["form"]
         if hasattr(form, "instance") and form.instance and form.instance.pk:
             apply_readonly_fields(form, readonly_fields)
             context["readonly_fields"] = readonly_fields
-
+    
+    # Handle inline formsets
+    if inline_config:
+        formsets = {}
+        instance = context.get('form').instance if context.get('form') else None
+        
+        for config in inline_config:
+            formset_class = inlineformset_factory(
+                config['parent_model'],
+                config['child_model'],
+                form=config.get('form_class'),
+                fields=config['fields'],
+                extra=config.get('extra', 3),
+                can_delete=config.get('can_delete', True),
+                can_delete_extra=True
+            )
+            
+            if request.method == 'POST':
+                formset = formset_class(request.POST, instance=instance)
+            else:
+                formset = formset_class(instance=instance)
+                
+            formsets[config['name']] = {
+                'formset': formset,
+                'config': config
+            }
+        
+        context['inline_formsets'] = formsets
+    
     return render(request, template_name, context)
 
 
@@ -42,6 +107,51 @@ def apply_readonly_fields(form, readonly_fields):
 
     form.clean = clean_with_readonly
     return readonly_fields
+
+
+class InlineFormsetMixin:
+    """Universal mixin for handling inline formsets in views"""
+    
+    inline_config = []  # List of inline configurations
+    
+    def get_inline_config(self):
+        """Override this method to define inline formsets"""
+        return getattr(self, 'inline_config', [])
+    
+    def get_inline_formsets(self, request, instance=None):
+        """Create inline formsets based on configuration"""
+        formsets = {}
+        
+        for config in self.get_inline_config():
+            formset_class = inlineformset_factory(
+                config['parent_model'],
+                config['child_model'],
+                form=config.get('form_class'),
+                fields=config['fields'],
+                extra=config.get('extra', 3),
+                can_delete=config.get('can_delete', True),
+                can_delete_extra=True
+            )
+            
+            if request.method == 'POST':
+                formset = formset_class(request.POST, instance=instance)
+            else:
+                formset = formset_class(instance=instance)
+                
+            formsets[config['name']] = formset
+            
+        return formsets
+    
+    def save_inline_formsets(self, formsets, instance):
+        """Save all inline formsets"""
+        for name, formset in formsets.items():
+            if formset.is_valid():
+                formset.instance = instance
+                formset.save()
+    
+    def validate_inline_formsets(self, formsets):
+        """Validate all inline formsets"""
+        return all(formset.is_valid() for formset in formsets.values())
 
 
 class PaginationMixin:

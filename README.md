@@ -164,7 +164,7 @@ class ProductForm(forms.ModelForm):
 
 ```python
 # views.py - Universal inline formsets
-from djcrudx.inline_mixins import render_with_inlines
+from djcrudx.mixins import render_with_readonly
 from django.forms import inlineformset_factory
 
 def organization_create(request):
@@ -225,7 +225,7 @@ def organization_create(request):
         }
     ]
     
-    return render_with_inlines(request, 'crud/form_view.html', {
+    return render_with_readonly(request, 'crud/form_view.html', {
         'form': form,
         'form_sections': form_sections,
         'page_title': 'New Organization'
@@ -358,24 +358,48 @@ LANGUAGE_CODE = 'pl'  # Automatic Polish translations
 
 ## 🔧 Helper Functions
 
-### render_with_readonly()
-Automatic base template and readonly field handling:
+### render_with_readonly() - Universal Form Renderer
+One function for all form rendering needs:
 
 ```python
 from djcrudx.mixins import render_with_readonly
 
-# Automatic base template + readonly fields
-return render_with_readonly(request, 'crud/form_view.html', context, readonly_fields=['id'])
+# Simple form
+return render_with_readonly(request, 'crud/form_view.html', context)
+
+# Form with readonly fields
+return render_with_readonly(request, 'crud/form_view.html', context, 
+                           readonly_fields=['created_at', 'id'])
+
+# Form with inline formsets
+return render_with_readonly(request, 'crud/form_view.html', context,
+                           inline_config=[{
+                               'name': 'employees',
+                               'parent_model': Organization,
+                               'child_model': Employee,
+                               'fields': ['user', 'code', 'position'],
+                               'extra': 3,
+                               'can_delete': True
+                           }])
+
+# Form with both readonly and inlines
+return render_with_readonly(request, 'crud/form_view.html', context,
+                           readonly_fields=['created_at'],
+                           inline_config=inline_config)
 ```
 
-### render_with_inlines()
-Universal inline formsets support:
+### CrudListMixin - Universal List Handler
+Complete list view with pagination and filtering:
 
 ```python
-from djcrudx.inline_mixins import render_with_inlines
+from djcrudx.mixins import CrudListMixin
 
-# Same template, with inline formsets
-return render_with_inlines(request, 'crud/form_view.html', context, inline_config=inline_config)
+def product_list(request):
+    mixin = CrudListMixin()
+    context = mixin.get_datatable_context(
+        queryset, filter_instance, table_config, request
+    )
+    return render(request, "crud/list_view.html", context)
 ```
 
 ### Mixins Available

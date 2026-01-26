@@ -344,7 +344,7 @@ class PositionForm(forms.ModelForm):
 
 """
 # views.py - Uniwersalne użycie inline formsets
-from djcrudx.inline_mixins import render_with_inlines
+from djcrudx.mixins import render_with_inlines
 from .models import Organization, Employee, Position, Role, User
 from .forms import OrganizationForm, EmployeeInlineForm
 
