@@ -4,8 +4,16 @@ from django.apps import apps
 from django.conf import settings
 
 
+def add_base_template_context(context):
+    """Dodaj base_template do kontekstu"""
+    if "base_template" not in context:
+        context["base_template"] = getattr(settings, 'DJCRUDX_BASE_TEMPLATE', None)
+    return context
+
+
 def render_with_readonly(request, template_name, context, readonly_fields=None):
     """Render with automatic readonly fields application"""
+    context = add_base_template_context(context)
     if readonly_fields and "form" in context:
         form = context["form"]
         if hasattr(form, "instance") and form.instance and form.instance.pk:
