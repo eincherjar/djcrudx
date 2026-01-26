@@ -1,78 +1,82 @@
+{% extends base_template|default:"crud/base.html" %}
 {% load form_tags %}
-<div{% if field.field.widget.input_type == 'checkbox' %} class="md:col-span-{{ section.columns|default:3 }}"{% endif %}>
+<div{% if field.field.widget.input_type == 'checkbox' %} class="md:col-span-{{ section.columns|default:3 }}"
+    {% endif %}>
     {% if field.field.widget.input_type == 'checkbox' %}
-        {% if field.field.choices %}
-            <!-- Multiple checkbox fields (like assigned_workers) -->
-            <h4 class="text-sm font-medium text-gray-700 mb-2">{{ field.label }}</h4>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                {% for choice in field %}
-                    <label class="flex items-center space-x-2">
-                        {{ choice.tag }}
-                        <span class="text-sm">{{ choice.choice_label }}</span>
-                    </label>
-                {% endfor %}
-            </div>
-        {% else %}
-            <!-- Single checkbox field -->
-            <label class="flex items-center space-x-2">
-                {{ field }}
-                <span class="text-sm font-medium text-gray-700">{{ field.label }}</span>
-            </label>
-        {% endif %}
-    {% elif field.field.widget.input_type == 'textarea' %}
-        <!-- Textarea fields -->
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-            {{ field.label }}
-            {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+    {% if field.field.choices %}
+    <!-- Multiple checkbox fields (like assigned_workers) -->
+    <h4 class="text-sm font-medium text-gray-700 mb-2">{{ field.label }}</h4>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+        {% for choice in field %}
+        <label class="flex items-center space-x-2">
+            {{ choice.tag }}
+            <span class="text-sm">{{ choice.choice_label }}</span>
         </label>
-        {{ field }}
+        {% endfor %}
+    </div>
     {% else %}
-        <!-- Regular fields -->
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-            {{ field.label }}
-            {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
-        </label>
-        {% if readonly_fields and field.name in readonly_fields %}
-            <!-- Readonly field display -->
-            {% if badge_data and field.name in badge_data %}
-                <!-- Field with badge styling -->
-                {% with field_badge=badge_data|get_item:field.name %}
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ field_badge.background_color }} {{ field_badge.text_color }}">
-                        {{ field.value }}
-                    </span>
-                {% endwith %}
-            {% else %}
-                <div class="w-full px-3 py-1 text-xs bg-gray-100 border border-gray-300 rounded text-gray-600">
-                    {{ field|get_display_value }}
-                </div>
-            {% endif %}
-            <!-- Hidden input to preserve value -->
-            {% if field.field.widget.input_type == 'datetime-local' %}
-                <input type="hidden" name="{{ field.name }}" value="{{ field.value|date:'Y-m-d\TH:i'|default:'' }}">
-            {% else %}
-                <input type="hidden" name="{{ field.name }}" value="{{ field.value|default:'' }}">
-            {% endif %}
-        {% else %}
-            {% if badge_data and field.name in badge_data %}
-                <!-- Editable field with badge styling -->
-                {% with field_badge=badge_data|get_item:field.name %}
-                    <div class="relative">
-                        {{ field }}
-                        {% if field_badge.icon %}
-                            <div class="absolute -top-1 -right-1">
-                                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full {{ field_badge.background_color }} {{ field_badge.text_color }}">
-                                    {{ field_badge.icon|safe }}
-                                </span>
-                            </div>
-                        {% endif %}
-                    </div>
-                {% endwith %}
-            {% else %}
-                {{ field }}
-            {% endif %}
+    <!-- Single checkbox field -->
+    <label class="flex items-center space-x-2">
+        {{ field }}
+        <span class="text-sm font-medium text-gray-700">{{ field.label }}</span>
+    </label>
+    {% endif %}
+    {% elif field.field.widget.input_type == 'textarea' %}
+    <!-- Textarea fields -->
+    <label class="block text-sm font-medium text-gray-700 mb-1">
+        {{ field.label }}
+        {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+    </label>
+    {{ field }}
+    {% else %}
+    <!-- Regular fields -->
+    <label class="block text-sm font-medium text-gray-700 mb-1">
+        {{ field.label }}
+        {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+    </label>
+    {% if readonly_fields and field.name in readonly_fields %}
+    <!-- Readonly field display -->
+    {% if badge_data and field.name in badge_data %}
+    <!-- Field with badge styling -->
+    {% with field_badge=badge_data|get_item:field.name %}
+    <span
+        class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ field_badge.background_color }} {{ field_badge.text_color }}">
+        {{ field.value }}
+    </span>
+    {% endwith %}
+    {% else %}
+    <div class="w-full px-3 py-1 text-xs bg-gray-100 border border-gray-300 rounded text-gray-600">
+        {{ field|get_display_value }}
+    </div>
+    {% endif %}
+    <!-- Hidden input to preserve value -->
+    {% if field.field.widget.input_type == 'datetime-local' %}
+    <input type="hidden" name="{{ field.name }}" value="{{ field.value|date:'Y-m-d\TH:i'|default:'' }}">
+    {% else %}
+    <input type="hidden" name="{{ field.name }}" value="{{ field.value|default:'' }}">
+    {% endif %}
+    {% else %}
+    {% if badge_data and field.name in badge_data %}
+    <!-- Editable field with badge styling -->
+    {% with field_badge=badge_data|get_item:field.name %}
+    <div class="relative">
+        {{ field }}
+        {% if field_badge.icon %}
+        <div class="absolute -top-1 -right-1">
+            <span
+                class="inline-flex items-center justify-center w-5 h-5 rounded-full {{ field_badge.background_color }} {{ field_badge.text_color }}">
+                {{ field_badge.icon|safe }}
+            </span>
+        </div>
         {% endif %}
+    </div>
+    {% endwith %}
+    {% else %}
+    {{ field }}
+    {% endif %}
+    {% endif %}
     {% endif %}
     {% if field.errors %}
-        <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
+    <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
     {% endif %}
-</div>
+    </div>
