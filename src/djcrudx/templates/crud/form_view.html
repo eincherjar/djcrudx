@@ -61,7 +61,9 @@
                             <!-- Render all inline formsets here -->
                             {% for formset_name, formset_data in inline_formsets.items %}
                             <div class="md:col-span-{{ section.columns|default:3 }} mt-4">
-                                <h4 class="text-lg font-medium text-gray-700 mb-4">{{ formset_data.config.section_title|default:formset_name|title }}</h4>
+                                {% if formset_data.config.section_title %}
+                                <h4 class="text-lg font-medium text-gray-700 mb-4">{{ formset_data.config.section_title }}</h4>
+                                {% endif %}
                                 
                                 {{ formset_data.formset.management_form }}
                                 
