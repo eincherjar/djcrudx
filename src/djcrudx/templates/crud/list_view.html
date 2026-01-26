@@ -1,7 +1,5 @@
-{% load djcrudx_tags %}
+{% extends base_template|default:"crud/base.html" %}
 {% load static %}
-{% get_base_template as base_template %}
-{% extends base_template %}
 
 {% block title %}{{ page_title }}{% endblock %}
 
