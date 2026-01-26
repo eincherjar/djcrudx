@@ -2,6 +2,20 @@ from django import forms
 from django.forms.widgets import Widget
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+from django.conf import settings
+
+
+def get_ui_colors():
+    """Pobierz kolory UI z ustawień Django"""
+    return getattr(settings, 'DJCRUDX_UI_COLORS', {
+        'primary': 'blue-500',
+        'primary_hover': 'blue-600',
+        'primary_text': 'blue-600',
+        'primary_ring': 'blue-500',
+        'primary_border': 'blue-500',
+        'secondary': 'gray-500',
+        'secondary_hover': 'gray-600'
+    })
 
 
 class MultiSelectDropdownWidget(Widget):
@@ -29,6 +43,7 @@ class MultiSelectDropdownWidget(Widget):
         attrs["class"] = attrs.get("class", "") + " multiselect-dropdown"
 
         selected_values = self.format_value(value)
+        ui_colors = get_ui_colors()
 
         # Pobierz choices z widget lub z bound field
         choices = getattr(self, "choices", [])
@@ -70,7 +85,7 @@ class MultiSelectDropdownWidget(Widget):
 
         html = f"""
             <div class="relative" id="{field_id}_container" x-data="{{ open: false, selectedText: '{display_text}' }}" @click.outside="open = false">
-                <button type="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-{{ ui_colors.primary_ring }} flex items-center justify-between gap-2" @click="open = !open">
+                <button type="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-{ui_colors['primary_ring']} flex items-center justify-between gap-2" @click="open = !open">
                     <span class="truncate text-xs" x-text="selectedText">{display_text}</span>
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -115,6 +130,7 @@ class DateRangePickerWidget(Widget):
         values = self.format_value(value)
         from_value = values[0] if values[0] else ""
         to_value = values[1] if values[1] else ""
+        ui_colors = get_ui_colors()
 
         # Formatuj daty do dd.mm.rrrr
         def format_date(date_str):
@@ -146,7 +162,7 @@ class DateRangePickerWidget(Widget):
 
         html = f'''
             <div class="relative" id="{field_id}_container" x-data="{{ open: false, displayText: '{display_text}' }}" @click.outside="open = false">
-                <button type="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-{{ ui_colors.primary_ring }} flex items-center justify-between gap-2" @click="open = !open">
+                <button type="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-{ui_colors["primary_ring"]} flex items-center justify-between gap-2" @click="open = !open">
                     <span class="truncate text-xs" x-text="displayText">{display_text}</span>
                     <span class="pointer-events-none">
                         <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -225,6 +241,7 @@ class ColoredSelectDropdownWidget(Widget):
         attrs["class"] = attrs.get("class", "") + " singleselect-dropdown"
 
         selected_value = self.format_value(value)
+        ui_colors = get_ui_colors()
 
         # Pobierz choices z widget lub z bound field
         choices = getattr(self, "choices", [])
@@ -323,7 +340,7 @@ class ColoredSelectDropdownWidget(Widget):
 
         html = f"""
             <div class="relative" id="{field_id}_container" x-data="{{ open: false, selectedText: '{selected_label}' }}" @click.outside="open = false">
-                <button type="button" class="w-full px-3 py-1 text-left border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-{{ ui_colors.primary_ring }} flex items-center justify-between gap-2 {selected_bg_class} {selected_text_class}" @click="open = !open">
+                <button type="button" class="w-full px-3 py-1 text-left border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-{ui_colors["primary_ring"]} flex items-center justify-between gap-2 {selected_bg_class} {selected_text_class}" @click="open = !open">
                     <span class="truncate text-xs" x-text="selectedText">{selected_label}</span>
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -365,6 +382,7 @@ class SingleSelectDropdownWidget(Widget):
         attrs["class"] = attrs.get("class", "") + " singleselect-dropdown"
 
         selected_value = self.format_value(value)
+        ui_colors = get_ui_colors()
 
         # Pobierz choices z widget lub z bound field
         choices = getattr(self, "choices", [])
@@ -415,7 +433,7 @@ class SingleSelectDropdownWidget(Widget):
 
         html = f"""
             <div class="relative" id="{field_id}_container" x-data="{{ open: false, selectedText: '{selected_label}' }}" @click.outside="open = false">
-                <button type="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-{{ ui_colors.primary_ring }} flex items-center justify-between gap-2" @click="open = !open">
+                <button type="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-{ui_colors["primary_ring"]} flex items-center justify-between gap-2" @click="open = !open">
                     <span class="truncate text-xs" x-text="selectedText">{selected_label}</span>
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -459,11 +477,12 @@ class DateTimePickerWidget(Widget):
 
         formatted_value = self.format_value(value)
         field_id = attrs.get("id", f"id_{name}")
+        ui_colors = get_ui_colors()
 
         html = f'''
             <div class="relative" id="{field_id}_container">
                 <input type="text" name="{name}" value="{formatted_value}"
-                        class="w-full px-3 py-1 text-xs bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-{{ ui_colors.primary_ring }}"
+                        class="w-full px-3 py-1 text-xs bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-{ui_colors["primary_ring"]}"
                         placeholder="dd.mm.rrrr hh:mm" readonly onclick="openDateTimePicker(this)">
                 <div class="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -498,6 +517,7 @@ class ActiveStatusDropdownWidget(Widget):
 
         selected_value = self.format_value(value)
         choices = getattr(self, "choices", [(True, "Tak"), (False, "Nie")])
+        ui_colors = get_ui_colors()
 
         options_html = ""
         selected_label = "Wybierz..."
@@ -535,7 +555,7 @@ class ActiveStatusDropdownWidget(Widget):
 
         html = f"""
             <div class="relative" id="{field_id}_container" x-data="{{ open: false, selectedText: '{selected_label}', selectedBg: '{selected_bg_class}', selectedTextClass: '{selected_text_class}' }}" @click.outside="open = false">
-                <button type="button" :class="'w-full px-3 py-1 text-left border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-{{ ui_colors.primary_ring }} flex items-center justify-between gap-2 ' + selectedBg + ' ' + selectedTextClass" @click="open = !open">
+                <button type="button" :class="'w-full px-3 py-1 text-left border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-{ui_colors["primary_ring"]} flex items-center justify-between gap-2 ' + selectedBg + ' ' + selectedTextClass" @click="open = !open">
                     <span class="truncate text-xs" x-text="selectedText">{selected_label}</span>
                     <svg class="w-4 h-4" :class="selectedTextClass.includes('white') ? 'text-white' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -556,8 +576,9 @@ class TextInputWidget(forms.TextInput):
     """Custom widget dla text input z jednolitym stylem"""
 
     def __init__(self, attrs=None):
+        ui_colors = get_ui_colors()
         default_attrs = {
-            "class": "w-full px-3 py-1 text-xs bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-{{ ui_colors.primary_ring }}"
+            "class": f"w-full px-3 py-1 text-xs bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-{ui_colors['primary_ring']}"
         }
         if attrs:
             default_attrs.update(attrs)
