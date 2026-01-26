@@ -57,18 +57,106 @@
                 <legend class="text-lg font-medium px-2 text-gray-700">{{ section.title }}</legend>
                 <div class="grid grid-cols-1 md:grid-cols-{{ section.columns|default:3 }} gap-4 mt-4">
                     {% for field_name in section.fields %}
-                    {% for field in form %}
-                    {% if field.name == field_name %}
-                    {% include 'crud/form_field.html' %}
-                    {% endif %}
-                    {% endfor %}
+                        {% if field_name == "inline_config" %}
+                            <!-- Render all inline formsets here -->
+                            {% for formset_name, formset_data in inline_formsets.items %}
+                            <div class="md:col-span-{{ section.columns|default:3 }} mt-4">
+                                <h4 class="text-lg font-medium text-gray-700 mb-4">{{ formset_data.config.section_title|default:formset_name|title }}</h4>
+                                
+                                {{ formset_data.formset.management_form }}
+                                
+                                <div id="formset-{{ formset_name }}" class="space-y-4">
+                                    {% for form_instance in formset_data.formset %}
+                                    <div class="inline-form border p-4 bg-white rounded relative">
+                                        <div class="grid grid-cols-1 md:grid-cols-{{ formset_data.config.columns|default:3 }} gap-4">
+                                            {% for field in form_instance %}
+                                                {% if not field.is_hidden %}
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                        {{ field.label }}
+                                                        {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                                    </label>
+                                                    {{ field }}
+                                                    {% if field.errors %}
+                                                        <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
+                                                    {% endif %}
+                                                </div>
+                                                {% else %}
+                                                    {{ field }}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        
+                                        {% if formset_data.formset.can_delete %}
+                                        <div class="absolute top-2 right-2">
+                                            {% if form_instance.instance.pk %}
+                                                {{ form_instance.DELETE }}
+                                                <label for="{{ form_instance.DELETE.id_for_label }}" 
+                                                       class="text-red-600 hover:text-red-800 cursor-pointer text-xs">
+                                                    Usuń
+                                                </label>
+                                            {% else %}
+                                                <button type="button" 
+                                                        onclick="deleteInlineForm(this)"
+                                                        class="text-red-600 hover:text-red-800 text-xs">
+                                                    Usuń
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <button type="button" 
+                                            onclick="addInlineForm('{{ formset_name }}', '{{ formset_data.formset.prefix }}')"
+                                            class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm">
+                                        Dodaj {{ formset_data.config.child_model._meta.verbose_name }}
+                                    </button>
+                                </div>
+                                
+                                <!-- Empty form template -->
+                                <div id="empty-form-{{ formset_name }}" style="display: none;">
+                                    <div class="inline-form border p-4 bg-white rounded relative">
+                                        <div class="grid grid-cols-1 md:grid-cols-{{ formset_data.config.columns|default:3 }} gap-4">
+                                            {% for field in formset_data.formset.empty_form %}
+                                                {% if not field.is_hidden %}
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                        {{ field.label }}
+                                                        {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                                    </label>
+                                                    {{ field }}
+                                                </div>
+                                                {% else %}
+                                                    {{ field }}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        <div class="absolute top-2 right-2">
+                                            <button type="button" 
+                                                    onclick="deleteInlineForm(this)"
+                                                    class="text-red-600 hover:text-red-800 text-xs">
+                                                Usuń
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <!-- Regular form field -->
+                            {% for field in form %}
+                            {% if field.name == field_name %}
+                            {% include 'crud/form_field.html' %}
+                            {% endif %}
+                            {% endfor %}
+                        {% endif %}
                     {% endfor %}
                 </div>
             </fieldset>
             {% endfor %}
-
-            <!-- Inline formsets -->
-            {% for formset_name, formset_data in inline_formsets.items %}
             <fieldset class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <legend class="text-lg font-medium px-2 text-gray-700">
                     {{ formset_data.config.section_title|default:formset_name|title }}

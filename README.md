@@ -163,7 +163,7 @@ class ProductForm(forms.ModelForm):
 ### 3. Forms with Inline Formsets (Related Objects)
 
 ```python
-# views.py - Universal inline formsets
+# views.py - Universal inline formsets with field positioning
 from djcrudx.mixins import render_with_readonly
 from django.forms import inlineformset_factory
 
@@ -222,6 +222,21 @@ def organization_create(request):
             "title": "Organization Info",
             "columns": 2,
             "fields": ["name", "vat_number"]
+        },
+        {
+            "title": "Address",
+            "columns": 3,
+            "fields": ["address", "city", "country"]
+        },
+        {
+            "title": "Roles and Employees",
+            "columns": 1,
+            "fields": ["role", "inline_config"]  # inline_config jako specjalne pole
+        },
+        {
+            "title": "Additional Info",
+            "columns": 1,
+            "fields": ["notes"]
         }
     ]
     
