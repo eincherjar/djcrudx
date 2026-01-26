@@ -56,7 +56,9 @@ class MultiSelectDropdownWidget(Widget):
             '''
 
         # Tekst wyświetlany w dropdown
-        display_text = ", ".join(selected_labels) if selected_labels else "Wybierz opcje..."
+        display_text = (
+            ", ".join(selected_labels) if selected_labels else "Wybierz opcje..."
+        )
         if len(display_text) > 30:
             display_text = f"{len(selected_labels)} wybranych"
 
@@ -65,17 +67,17 @@ class MultiSelectDropdownWidget(Widget):
 
         # JavaScript dla aktualizacji tekstu
         multiselect_js = "const checkboxes = $el.querySelectorAll('input[type=checkbox]:checked'); const labels = Array.from(checkboxes).map(cb => cb.nextElementSibling.textContent); if (labels.length === 0) { selectedText = 'Wybierz opcje...'; } else if (labels.join(', ').length > 30) { selectedText = labels.length + ' wybranych'; } else { selectedText = labels.join(', '); }"
-        
+
         html = f"""
             <div class="relative" id="{field_id}_container" x-data="{{ open: false, selectedText: '{display_text}' }}" @click.outside="open = false">
-                <button type="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-between gap-2" @click="open = !open">
+                <button type="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-{{ ui_colors.primary_ring }} flex items-center justify-between gap-2" @click="open = !open">
                     <span class="truncate text-xs" x-text="selectedText">{display_text}</span>
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div x-show="open" x-transition class="absolute z-50 w-full min-w-40 mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-hidden dropdown-menu" 
-                     :class="$el.getBoundingClientRect().bottom + 250 > window.innerHeight ? 'bottom-full mb-1' : 'top-full mt-1'" 
+                <div x-show="open" x-transition class="absolute z-50 w-full min-w-40 mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-hidden dropdown-menu"
+                     :class="$el.getBoundingClientRect().bottom + 250 > window.innerHeight ? 'bottom-full mb-1' : 'top-full mt-1'"
                      @change="{multiselect_js}">
                     <div class="p-2 border-b">
                         <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" onkeyup="filterOptions(this)">
@@ -144,7 +146,7 @@ class DateRangePickerWidget(Widget):
 
         html = f'''
             <div class="relative" id="{field_id}_container" x-data="{{ open: false, displayText: '{display_text}' }}" @click.outside="open = false">
-                <button type="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-between gap-2" @click="open = !open">
+                <button type="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-{{ ui_colors.primary_ring }} flex items-center justify-between gap-2" @click="open = !open">
                     <span class="truncate text-xs" x-text="displayText">{display_text}</span>
                     <span class="pointer-events-none">
                         <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -171,7 +173,7 @@ class DateRangePickerWidget(Widget):
                                 const inputs = $el.closest('.dropdown-menu').querySelectorAll('input[type=date]');
                                 const fromValue = inputs[0].value;
                                 const toValue = inputs[1].value;
-                                
+
                                 function formatDate(dateStr) {{
                                     if (dateStr) {{
                                         const [year, month, day] = dateStr.split('-');
@@ -179,7 +181,7 @@ class DateRangePickerWidget(Widget):
                                     }}
                                     return dateStr;
                                 }}
-                                
+
                                 if (fromValue && toValue) {{
                                     displayText = formatDate(fromValue) + ' - ' + formatDate(toValue);
                                 }} else if (fromValue) {{
@@ -189,7 +191,7 @@ class DateRangePickerWidget(Widget):
                                 }} else {{
                                     displayText = 'Wybierz zakres dat';
                                 }}
-                                
+
                                 open = false;
                             " class="flex-1 px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600">OK</button>
                         </div>
@@ -227,12 +229,24 @@ class ColoredSelectDropdownWidget(Widget):
         # Pobierz choices z widget lub z bound field
         choices = getattr(self, "choices", [])
         if hasattr(self, "field") and hasattr(self.field, "queryset"):
-            choices = [(obj.pk, str(obj), getattr(obj, 'bg_color', '#ffffff'), getattr(obj, 'txt_color', '#000000')) for obj in self.field.queryset.all()]
+            choices = [
+                (
+                    obj.pk,
+                    str(obj),
+                    getattr(obj, "bg_color", "#ffffff"),
+                    getattr(obj, "txt_color", "#000000"),
+                )
+                for obj in self.field.queryset.all()
+            ]
         elif not choices:
             # Fallback - pobierz bezpośrednio z modelu Status
             try:
                 from appointments.models import Status
-                choices = [(obj.pk, str(obj), obj.bg_color, obj.txt_color) for obj in Status.objects.all()]
+
+                choices = [
+                    (obj.pk, str(obj), obj.bg_color, obj.txt_color)
+                    for obj in Status.objects.all()
+                ]
             except:
                 choices = []
 
@@ -241,6 +255,7 @@ class ColoredSelectDropdownWidget(Widget):
         if selected_value:
             try:
                 from appointments.models import Status
+
                 selected_status = Status.objects.get(pk=selected_value)
             except:
                 pass
@@ -252,7 +267,11 @@ class ColoredSelectDropdownWidget(Widget):
         selected_text_class = "text-gray-900"
 
         # Dodaj pustą opcję jeśli istnieje
-        if hasattr(self, "field") and hasattr(self.field, "empty_label") and self.field.empty_label:
+        if (
+            hasattr(self, "field")
+            and hasattr(self.field, "empty_label")
+            and self.field.empty_label
+        ):
             empty_checked = "checked" if not selected_value else ""
             if not selected_value:
                 selected_label = self.field.empty_label
@@ -271,7 +290,7 @@ class ColoredSelectDropdownWidget(Widget):
                 bg_color, txt_color = "#ffffff", "#000000"
             else:
                 continue
-                
+
             if option_value == "":
                 continue
 
@@ -301,10 +320,10 @@ class ColoredSelectDropdownWidget(Widget):
 
         # JavaScript dla aktualizacji tekstu
         singleselect_js = "const radio = $el.querySelector('input[type=radio]:checked'); selectedText = radio ? radio.nextElementSibling.textContent : 'Wybierz opcję...'; open = false;"
-        
+
         html = f"""
             <div class="relative" id="{field_id}_container" x-data="{{ open: false, selectedText: '{selected_label}' }}" @click.outside="open = false">
-                <button type="button" class="w-full px-3 py-1 text-left border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-between gap-2 {selected_bg_class} {selected_text_class}" @click="open = !open">
+                <button type="button" class="w-full px-3 py-1 text-left border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-{{ ui_colors.primary_ring }} flex items-center justify-between gap-2 {selected_bg_class} {selected_text_class}" @click="open = !open">
                     <span class="truncate text-xs" x-text="selectedText">{selected_label}</span>
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -357,7 +376,11 @@ class SingleSelectDropdownWidget(Widget):
         selected_label = "Wybierz opcję..."
 
         # Dodaj pustą opcję jeśli istnieje
-        if hasattr(self, "field") and hasattr(self.field, "empty_label") and self.field.empty_label:
+        if (
+            hasattr(self, "field")
+            and hasattr(self.field, "empty_label")
+            and self.field.empty_label
+        ):
             empty_checked = "checked" if not selected_value else ""
             if not selected_value:
                 selected_label = self.field.empty_label
@@ -386,20 +409,20 @@ class SingleSelectDropdownWidget(Widget):
 
         # Dodaj id do kontenera
         field_id = attrs.get("id", f"id_{name}")
-        
+
         # JavaScript dla aktualizacji tekstu
         singleselect_js = "const radio = $el.querySelector('input[type=radio]:checked'); selectedText = radio ? radio.nextElementSibling.textContent : 'Wybierz opcję...'; open = false;"
-        
+
         html = f"""
             <div class="relative" id="{field_id}_container" x-data="{{ open: false, selectedText: '{selected_label}' }}" @click.outside="open = false">
-                <button type="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-between gap-2" @click="open = !open">
+                <button type="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-{{ ui_colors.primary_ring }} flex items-center justify-between gap-2" @click="open = !open">
                     <span class="truncate text-xs" x-text="selectedText">{selected_label}</span>
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div x-show="open" x-transition class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-hidden dropdown-menu" 
-                     :class="$el.getBoundingClientRect().bottom + 250 > window.innerHeight ? 'bottom-full mb-1' : 'top-full mt-1'" 
+                <div x-show="open" x-transition class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-hidden dropdown-menu"
+                     :class="$el.getBoundingClientRect().bottom + 250 > window.innerHeight ? 'bottom-full mb-1' : 'top-full mt-1'"
                      @change="{singleselect_js}">
                     <div class="p-2 border-b">
                         <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" onkeyup="filterOptions(this)">
@@ -439,8 +462,8 @@ class DateTimePickerWidget(Widget):
 
         html = f'''
             <div class="relative" id="{field_id}_container">
-                <input type="text" name="{name}" value="{formatted_value}" 
-                        class="w-full px-3 py-1 text-xs bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                <input type="text" name="{name}" value="{formatted_value}"
+                        class="w-full px-3 py-1 text-xs bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-{{ ui_colors.primary_ring }}"
                         placeholder="dd.mm.rrrr hh:mm" readonly onclick="openDateTimePicker(this)">
                 <div class="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -474,7 +497,7 @@ class ActiveStatusDropdownWidget(Widget):
             attrs = {}
 
         selected_value = self.format_value(value)
-        choices = getattr(self, "choices", [(True, 'Tak'), (False, 'Nie')])
+        choices = getattr(self, "choices", [(True, "Tak"), (False, "Nie")])
 
         options_html = ""
         selected_label = "Wybierz..."
@@ -493,12 +516,12 @@ class ActiveStatusDropdownWidget(Widget):
                     selected_text_class = "text-gray-900"
 
             checked = "checked" if is_selected else ""
-            
+
             if str(option_value) == "False":
                 option_html = f'<span class="text-xs px-2 py-1 rounded bg-red-600 text-white font-bold">{option_label}</span>'
             else:
                 option_html = f'<span class="text-xs">{option_label}</span>'
-            
+
             options_html += f'''
                 <label class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer">
                     <input type="radio" name="{name}" value="{option_value}" {checked}>
@@ -507,12 +530,12 @@ class ActiveStatusDropdownWidget(Widget):
             '''
 
         field_id = attrs.get("id", f"id_{name}")
-        
+
         singleselect_js = "const radio = $el.querySelector('input[type=radio]:checked'); if (radio) { const span = radio.nextElementSibling; selectedText = span.textContent; if (radio.value === 'False') { selectedBg = 'bg-red-600'; selectedTextClass = 'text-white font-bold'; } else { selectedBg = 'bg-white'; selectedTextClass = 'text-gray-900'; } } else { selectedText = 'Wybierz...'; selectedBg = 'bg-white'; selectedTextClass = 'text-gray-900'; } open = false;"
-        
+
         html = f"""
             <div class="relative" id="{field_id}_container" x-data="{{ open: false, selectedText: '{selected_label}', selectedBg: '{selected_bg_class}', selectedTextClass: '{selected_text_class}' }}" @click.outside="open = false">
-                <button type="button" :class="'w-full px-3 py-1 text-left border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-between gap-2 ' + selectedBg + ' ' + selectedTextClass" @click="open = !open">
+                <button type="button" :class="'w-full px-3 py-1 text-left border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-{{ ui_colors.primary_ring }} flex items-center justify-between gap-2 ' + selectedBg + ' ' + selectedTextClass" @click="open = !open">
                     <span class="truncate text-xs" x-text="selectedText">{selected_label}</span>
                     <svg class="w-4 h-4" :class="selectedTextClass.includes('white') ? 'text-white' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -533,7 +556,9 @@ class TextInputWidget(forms.TextInput):
     """Custom widget dla text input z jednolitym stylem"""
 
     def __init__(self, attrs=None):
-        default_attrs = {"class": "w-full px-3 py-1 text-xs bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"}
+        default_attrs = {
+            "class": "w-full px-3 py-1 text-xs bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-{{ ui_colors.primary_ring }}"
+        }
         if attrs:
             default_attrs.update(attrs)
         super().__init__(attrs=default_attrs)
