@@ -112,7 +112,7 @@
                                     <button type="button" 
                                             onclick="addInlineForm('{{ formset_name }}', '{{ formset_data.formset.prefix }}')"
                                             class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm">
-                                        Dodaj {{ formset_data.config.section_title|default:"element" }}
+                                        Dodaj {{ formset_data.config.add_button_text|default:"element" }}
                                     </button>
                                 </div>
                                 
