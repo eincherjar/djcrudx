@@ -112,7 +112,7 @@
                                     <button type="button" 
                                             onclick="addInlineForm('{{ formset_name }}', '{{ formset_data.formset.prefix }}')"
                                             class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm">
-                                        Dodaj {{ formset_data.config.child_model._meta.verbose_name }}
+                                        Dodaj {{ formset_data.config.section_title|default:"element" }}
                                     </button>
                                 </div>
                                 
@@ -211,7 +211,7 @@
                     <button type="button" 
                             onclick="addInlineForm('{{ formset_name }}', '{{ formset_data.formset.prefix }}')"
                             class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm">
-                        Dodaj {{ formset_data.config.child_model._meta.verbose_name }}
+                        Dodaj {{ formset_data.config.section_title|default:"element" }}
                     </button>
                 </div>
                 

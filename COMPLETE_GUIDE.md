@@ -280,9 +280,15 @@ class OrganizationFilter(django_filters.FilterSet):
         empty_label="Wszystkie statusy"
     )
     
-    # Filtr aktywności
-    is_active = django_filters.BooleanFilter(
-        widget=ActiveStatusDropdownWidget()
+    # Filtr aktywności - użyj ChoiceFilter dla dropdown
+    is_active = django_filters.ChoiceFilter(
+        choices=[
+            ('', 'Wszystkie'),
+            ('true', 'Aktywne'),
+            ('false', 'Nieaktywne'),
+        ],
+        widget=SingleSelectDropdownWidget(),
+        method='filter_is_active'
     )
     
     # Filtr zakresu dat założenia
@@ -300,6 +306,14 @@ class OrganizationFilter(django_filters.FilterSet):
     class Meta:
         model = Organization
         fields = ['name', 'country', 'status', 'is_active', 'founded_date', 'created_at']
+    
+    def filter_is_active(self, queryset, name, value):
+        """Custom method to handle boolean filtering"""
+        if value == 'true':
+            return queryset.filter(is_active=True)
+        elif value == 'false':
+            return queryset.filter(is_active=False)
+        return queryset
 
 class EmployeeFilter(django_filters.FilterSet):
     """Filtry dla tabeli pracowników"""
@@ -386,6 +400,7 @@ ORGANIZATION_TABLE_CONFIG = [
     {
         "label": "Aktywna",
         "field": "is_active",
+        "value": lambda obj: "Tak" if obj.is_active else "Nie",  # WYMAGANE dla is_badge
         "is_badge": True,
         "badge_data": lambda obj: [{
             "name": "Tak" if obj.is_active else "Nie",
