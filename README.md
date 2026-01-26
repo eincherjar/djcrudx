@@ -34,79 +34,104 @@ INSTALLED_APPS = [
 ### 1. Basic CRUD Views
 
 ```python
-from djcrudx import create_crud
-from djcrudx.mixins import render_with_readonly
+# views.py
+from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib import messages
+from djcrudx.mixins import CrudListMixin, render_with_readonly
 from .models import Product
 from .forms import ProductForm
 from .filters import ProductFilter
 
-# Table configuration with filters
+# Table configuration
 TABLE_CONFIG = [
     {
         "label": "Name",
         "field": "name",
         "value": lambda obj: obj.name,
         "url": lambda obj: ("app:product_update", {"pk": obj.pk}),
-        "filter_field": product_filter.form['name'],  # Add filter input to column
     },
     {
         "label": "Price",
         "field": "price",
         "value": lambda obj: f"${obj.price}",
-        # No filter for this column
     },
 ]
 
-# Form sections
+# Form sections - kontroluje layout i grupowanie pól
 FORM_SECTIONS = [
     {
-        "title": "Basic Info",
-        "columns": 2,
-        "fields": ["name", "price"]
+        "title": "Basic Information",
+        "columns": 2,  # 2 kolumny w grid
+        "fields": ["name", "description", "category"]
+    },
+    {
+        "title": "Pricing & Stock", 
+        "columns": 3,  # 3 kolumny w grid
+        "fields": ["price", "cost", "stock_quantity"]
+    },
+    {
+        "title": "Metadata",
+        "columns": 1,  # 1 kolumna - pełna szerokość
+        "fields": ["created_at", "updated_at"]
     }
 ]
 
-# Create CRUD views
-crud = create_crud(Product, ProductForm, ProductFilter)
+def product_list(request):
+    """List view with automatic datatable"""
+    products = Product.objects.all()
+    product_filter = ProductFilter(request.GET, queryset=products)
+    
+    # Use DjCrudX mixin for datatable
+    mixin = CrudListMixin()
+    context = mixin.get_datatable_context(
+        product_filter.qs, product_filter, TABLE_CONFIG, request
+    )
+    
+    context.update({
+        "page_title": "Products",
+        "create_url": "app:product_create"
+    })
+    
+    return render(request, "crud/list_view.html", context)
 
-# List view - automatic base template handling
-product_list = crud['list'](
-    TABLE_CONFIG,
-    page_title="Products",
-    create_url="app:product_create"
-)
-
-# Form views with automatic base template and readonly support
 def product_create(request):
+    """Create view with form sections"""
     if request.method == 'POST':
         form = ProductForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Product created successfully.')
             return redirect('app:product_list')
     else:
         form = ProductForm()
     
     return render_with_readonly(request, 'crud/form_view.html', {
         'form': form,
-        'form_sections': FORM_SECTIONS,
-        'page_title': 'New Product'
+        'form_sections': FORM_SECTIONS,  # Sekcje kontrolują layout
+        'page_title': 'New Product',
+        'back_url': 'app:product_list',  # URL powrotu
+        'submit_label': 'Create Product'  # Tekst przycisku
     })
 
 def product_update(request, pk):
+    """Update view with readonly fields"""
     product = get_object_or_404(Product, pk=pk)
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=product)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Product updated successfully.')
             return redirect('app:product_list')
     else:
         form = ProductForm(instance=product)
     
     return render_with_readonly(request, 'crud/form_view.html', {
         'form': form,
-        'form_sections': FORM_SECTIONS,
-        'page_title': 'Edit Product'
-    }, readonly_fields=['created_at', 'id'])  # Automatic readonly handling
+        'form_sections': FORM_SECTIONS,  # Te same sekcje
+        'page_title': 'Edit Product',
+        'back_url': 'app:product_list',
+        'submit_label': 'Update Product'
+    }, readonly_fields=['created_at', 'updated_at', 'id'])  # Readonly metadata
 ```
 
 ### 2. Advanced Widgets
@@ -115,9 +140,11 @@ def product_update(request, pk):
 from django import forms
 from djcrudx.widgets import (
     MultiSelectDropdownWidget,
+    SingleSelectDropdownWidget,
     ColoredSelectDropdownWidget,
     DateTimePickerWidget,
     DateRangePickerWidget,
+    TextInputWidget,
 )
 
 class ProductForm(forms.ModelForm):
@@ -125,13 +152,87 @@ class ProductForm(forms.ModelForm):
         model = Product
         fields = '__all__'
         widgets = {
-            'categories': MultiSelectDropdownWidget(),
-            'status': ColoredSelectDropdownWidget(),
-            'created_at': DateTimePickerWidget(),
+            'categories': MultiSelectDropdownWidget(),      # ManyToMany
+            'category': SingleSelectDropdownWidget(),       # ForeignKey
+            'status': ColoredSelectDropdownWidget(),        # Colored options
+            'created_at': DateTimePickerWidget(),           # DateTime picker
+            'name': TextInputWidget(attrs={'placeholder': 'Product name'}),
         }
 ```
 
-### 3. URL Configuration
+### 3. Forms with Inline Formsets (Related Objects)
+
+```python
+# views.py - Universal inline formsets
+from djcrudx.inline_mixins import render_with_inlines
+from django.forms import inlineformset_factory
+
+def organization_create(request):
+    """Create organization with employees"""
+    if request.method == 'POST':
+        form = OrganizationForm(request.POST)
+        
+        # Inline configuration
+        inline_config = [
+            {
+                'name': 'employees',
+                'parent_model': Organization,
+                'child_model': Employee,
+                'fields': ['user', 'code', 'position', 'is_manager'],
+                'extra': 3,
+                'can_delete': True,
+                'section_title': 'Pracownicy',
+                'columns': 4
+            }
+        ]
+        
+        # Validate main form
+        if form.is_valid():
+            # Validate inline formsets
+            formsets = {}
+            for config in inline_config:
+                formset_class = inlineformset_factory(
+                    config['parent_model'], config['child_model'],
+                    fields=config['fields'], extra=config['extra'],
+                    can_delete=config['can_delete']
+                )
+                formsets[config['name']] = formset_class(request.POST)
+            
+            if all(formset.is_valid() for formset in formsets.values()):
+                organization = form.save()
+                for formset in formsets.values():
+                    formset.instance = organization
+                    formset.save()
+                return redirect('app:organization_list')
+    else:
+        form = OrganizationForm()
+        inline_config = [{
+            'name': 'employees',
+            'parent_model': Organization,
+            'child_model': Employee,
+            'fields': ['user', 'code', 'position', 'is_manager'],
+            'extra': 3,
+            'can_delete': True,
+            'section_title': 'Pracownicy',
+            'columns': 4
+        }]
+    
+    form_sections = [
+        {
+            "title": "Organization Info",
+            "columns": 2,
+            "fields": ["name", "vat_number"]
+        }
+    ]
+    
+    return render_with_inlines(request, 'crud/form_view.html', {
+        'form': form,
+        'form_sections': form_sections,
+        'page_title': 'New Organization'
+    }, inline_config=inline_config)
+```
+
+### 4. URL Configuration
 
 ```python
 # urls.py
@@ -238,8 +339,8 @@ LANGUAGE_CODE = 'pl'  # Automatic Polish translations
 
 ## 🎨 Available Widgets
 
-- **MultiSelectDropdownWidget** - Multi-select with checkboxes
-- **SingleSelectDropdownWidget** - Single select with radio buttons
+- **MultiSelectDropdownWidget** - Multi-select with checkboxes (ManyToMany fields)
+- **SingleSelectDropdownWidget** - Single select with radio buttons (ForeignKey fields)
 - **ColoredSelectDropdownWidget** - Select with colored options
 - **DateTimePickerWidget** - Date and time picker
 - **DateRangePickerWidget** - Date range picker for filters
@@ -255,6 +356,35 @@ LANGUAGE_CODE = 'pl'  # Automatic Polish translations
 - **Links** - Clickable cells with URLs
 - **Search** - Built-in search functionality
 
+## 🔧 Helper Functions
+
+### render_with_readonly()
+Automatic base template and readonly field handling:
+
+```python
+from djcrudx.mixins import render_with_readonly
+
+# Automatic base template + readonly fields
+return render_with_readonly(request, 'crud/form_view.html', context, readonly_fields=['id'])
+```
+
+### render_with_inlines()
+Universal inline formsets support:
+
+```python
+from djcrudx.inline_mixins import render_with_inlines
+
+# Same template, with inline formsets
+return render_with_inlines(request, 'crud/form_view.html', context, inline_config=inline_config)
+```
+
+### Mixins Available
+- **CrudListMixin** - Complete list view with pagination and filtering
+- **ReadonlyFormMixin** - Automatic readonly fields for class-based views
+- **PaginationMixin** - Easy pagination handling
+- **DataTableMixin** - Table generation from configuration
+- **InlineFormsetMixin** - Universal inline formsets handling
+
 ## 🔒 Permissions (Optional)
 
 The library supports optional permission integration:
@@ -267,9 +397,210 @@ from djcrudx import create_crud_views  # Full version with permissions
 # - get_filtered_queryset function
 ```
 
-## 🎯 Examples
+## 🎯 Praktyczne Przykłady
 
-### Colored Status Badges
+### Kompleksny formularz pracownika
+
+```python
+# views.py
+from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib import messages
+from djcrudx.mixins import render_with_readonly
+from .models import Employee
+from .forms import EmployeeForm
+
+# Sekcje formularza - kontrolują layout i grupowanie
+EMPLOYEE_FORM_SECTIONS = [
+    {
+        "title": "Personal Information",
+        "columns": 2,  # 2 kolumny obok siebie
+        "fields": ["first_name", "last_name", "email", "phone"]
+    },
+    {
+        "title": "Job Details",
+        "columns": 3,  # 3 kolumny obok siebie
+        "fields": ["position", "department", "salary", "hire_date"]
+    },
+    {
+        "title": "Status & Metadata",
+        "columns": 1,  # 1 kolumna - pełna szerokość
+        "fields": ["is_active", "created_at", "updated_at"]
+    }
+]
+
+def employee_create(request):
+    """Create new employee with sectioned form"""
+    if request.method == 'POST':
+        form = EmployeeForm(request.POST)
+        if form.is_valid():
+            employee = form.save()
+            messages.success(request, f'Employee {employee.first_name} {employee.last_name} created.')
+            return redirect('app:employee_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = EmployeeForm()
+    
+    return render_with_readonly(request, 'crud/form_view.html', {
+        'form': form,
+        'form_sections': EMPLOYEE_FORM_SECTIONS,
+        'page_title': 'New Employee',
+        'back_url': 'app:employee_list',
+        'submit_label': 'Create Employee'
+    })
+
+def employee_update(request, pk):
+    """Update employee with readonly metadata"""
+    employee = get_object_or_404(Employee, pk=pk)
+    if request.method == 'POST':
+        form = EmployeeForm(request.POST, instance=employee)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Employee {employee.first_name} {employee.last_name} updated.')
+            return redirect('app:employee_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = EmployeeForm(instance=employee)
+    
+    return render_with_readonly(request, 'crud/form_view.html', {
+        'form': form,
+        'form_sections': EMPLOYEE_FORM_SECTIONS,  # Te same sekcje
+        'page_title': f'Edit {employee.first_name} {employee.last_name}',
+        'back_url': 'app:employee_list',
+        'submit_label': 'Update Employee'
+    }, readonly_fields=['created_at', 'updated_at'])  # Metadata readonly
+```
+
+### Różne layouty dla różnych formularzy
+
+```python
+# Prosty formularz kategorii - 1 sekcja
+CATEGORY_FORM_SECTIONS = [
+    {
+        "title": "Category Details",
+        "columns": 1,
+        "fields": ["name", "description", "is_active"]
+    }
+]
+
+# Złożony formularz produktu - wiele sekcji
+PRODUCT_FORM_SECTIONS = [
+    {
+        "title": "Basic Info",
+        "columns": 2,
+        "fields": ["name", "code", "category", "brand"]
+    },
+    {
+        "title": "Pricing",
+        "columns": 4,  # 4 kolumny dla cen
+        "fields": ["price", "cost", "margin", "tax_rate"]
+    },
+    {
+        "title": "Inventory",
+        "columns": 3,
+        "fields": ["stock_quantity", "min_stock", "max_stock"]
+    },
+    {
+        "title": "Description",
+        "columns": 1,  # Pełna szerokość dla textarea
+        "fields": ["description", "notes"]
+    }
+]
+
+def category_create(request):
+    """Simple category form"""
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('app:category_list')
+    else:
+        form = CategoryForm()
+    
+    return render_with_readonly(request, 'crud/form_view.html', {
+        'form': form,
+        'form_sections': CATEGORY_FORM_SECTIONS,  # Prosty layout
+        'page_title': 'New Category'
+    })
+
+def product_create(request):
+    """Complex product form"""
+    if request.method == 'POST':
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('app:product_list')
+    else:
+        form = ProductForm()
+    
+    return render_with_readonly(request, 'crud/form_view.html', {
+        'form': form,
+        'form_sections': PRODUCT_FORM_SECTIONS,  # Złożony layout
+        'page_title': 'New Product'
+    })
+```
+
+### Responsywny layout i walidacja
+
+```python
+# Responsywne sekcje - automatycznie dostosowują się do ekranu
+CONTACT_FORM_SECTIONS = [
+    {
+        "title": "Contact Info",
+        "columns": 2,  # Desktop: 2 kolumny, Mobile: 1 kolumna
+        "fields": ["email", "phone", "address", "city"]
+    },
+    {
+        "title": "Social Media",
+        "columns": 3,  # Desktop: 3 kolumny, Mobile: 1 kolumna
+        "fields": ["facebook", "twitter", "linkedin"]
+    }
+]
+
+def contact_create(request):
+    """Contact form with error handling"""
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            contact = form.save()
+            messages.success(request, f'Contact {contact.email} created successfully!')
+            return redirect('app:contact_list')
+        else:
+            # Błędy są automatycznie wyświetlane pod polami
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ContactForm()
+    
+    return render_with_readonly(request, 'crud/form_view.html', {
+        'form': form,
+        'form_sections': CONTACT_FORM_SECTIONS,
+        'page_title': 'New Contact',
+        'back_url': 'app:contact_list'
+    })
+```
+
+### URLs Configuration
+
+```python
+# urls.py
+from django.urls import path
+from . import views
+
+app_name = 'app'
+
+urlpatterns = [
+    # Product URLs
+    path('products/', views.product_list, name='product_list'),
+    path('products/create/', views.product_create, name='product_create'),
+    path('products/<int:pk>/edit/', views.product_update, name='product_update'),
+    
+    # Employee URLs
+    path('employees/', views.employee_list, name='employee_list'),
+    path('employees/create/', views.employee_create, name='employee_create'),
+    path('employees/<int:pk>/edit/', views.employee_update, name='employee_update'),
+]
+```
 
 ```python
 {
@@ -341,24 +672,6 @@ class ProductFilter(django_filters.FilterSet):
 - **Tailwind CSS** - Required for styling (included via CDN in templates)
 - **Alpine.js** - Required for interactive widgets (included via CDN in templates)
 
-## 🔧 Helper Functions
-
-### render_with_readonly()
-Automatic base template and readonly field handling:
-
-```python
-from djcrudx.mixins import render_with_readonly
-
-# Automatic base template + readonly fields
-return render_with_readonly(request, template, context, readonly_fields=['id'])
-```
-
-### Mixins Available
-- **CrudListMixin** - Complete list view with pagination and filtering
-- **ReadonlyFormMixin** - Automatic readonly fields for class-based views
-- **PaginationMixin** - Easy pagination handling
-- **DataTableMixin** - Table generation from configuration
-
 ### Frontend Dependencies
 
 DjCrudX templates include Tailwind CSS and Alpine.js via CDN:
@@ -377,12 +690,13 @@ If you prefer to use your own Tailwind CSS setup, you can override the base temp
 
 - ✅ **Automatic base template handling** - No manual context needed!
 - ✅ **Automatic readonly fields** - Use `render_with_readonly()` helper
+- ✅ **Universal inline formsets** - Add/edit/delete related objects in one form
 - ✅ **Smart template inheritance** - `{% extends base_template|default:"crud/base.html" %}`
 - ✅ **UI color customization** - `DJCRUDX_UI_COLORS` in settings
-- ✅ **Fixed pagination** - Correct template paths and variables
-- ✅ **Fixed template tags** - All imports working correctly
+- ✅ **Advanced widgets** - MultiSelect, SingleSelect, ColoredSelect, DateTime
+- ✅ **Responsive design** - Tailwind CSS + Alpine.js
 - ✅ **Polish translations** - Built-in i18n support
-- ✅ **Mixin architecture** - Reusable components for custom views
+- ✅ **One template for everything** - `crud/form_view.html` handles all cases
 
 ## 📝 License
 

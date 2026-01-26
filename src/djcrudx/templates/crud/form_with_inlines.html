@@ -160,8 +160,6 @@
     </div>
 </div>
 
-<!-- JavaScript for inline formsets -->
-{% if inline_formsets %}
 <script>
 function addInlineForm(formsetName, prefix) {
     const totalForms = document.getElementById('id_' + prefix + '-TOTAL_FORMS');
@@ -204,13 +202,10 @@ function deleteInlineForm(element) {
         
         // Update form indices
         const formsetName = element.closest('fieldset').querySelector('[id^="formset-"]').id.replace('formset-', '');
-        const prefix = formsetName;
+        const prefix = formsetName; // Assuming prefix matches formset name
         const totalForms = document.getElementById('id_' + prefix + '-TOTAL_FORMS');
-        if (totalForms) {
-            totalForms.value = parseInt(totalForms.value) - 1;
-        }
+        totalForms.value = parseInt(totalForms.value) - 1;
     }
 }
 </script>
-{% endif %}
 {% endblock %}
