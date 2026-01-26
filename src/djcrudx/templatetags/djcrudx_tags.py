@@ -1,7 +1,13 @@
 from django import template
+from django.conf import settings
 from ..translations import smart_translate
 
 register = template.Library()
+
+@register.simple_tag
+def get_base_template():
+    """Pobierz base template z ustawień Django"""
+    return getattr(settings, 'DJCRUDX_BASE_TEMPLATE', 'crud/base.html')
 
 @register.simple_tag
 def trans(text):

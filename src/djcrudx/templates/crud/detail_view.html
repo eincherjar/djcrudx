@@ -1,4 +1,6 @@
-{% extends base_template|default:"crud/base.html" %}
+{% load djcrudx_tags %}
+{% get_base_template as base_template %}
+{% extends base_template %}
 {% load custom_filters %}
 
 {% block title %}{{ page_title }}{% endblock %}

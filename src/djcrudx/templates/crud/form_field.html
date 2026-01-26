@@ -1,4 +1,3 @@
-{% extends base_template|default:"crud/base.html" %}
 {% load form_tags %}
 <div{% if field.field.widget.input_type == 'checkbox' %} class="md:col-span-{{ section.columns|default:3 }}"
     {% endif %}>
