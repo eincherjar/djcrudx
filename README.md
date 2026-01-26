@@ -35,6 +35,7 @@ INSTALLED_APPS = [
 
 ```python
 from djcrudx import create_crud
+from djcrudx.mixins import render_with_readonly
 from .models import Product
 from .forms import ProductForm
 from .filters import ProductFilter
@@ -68,17 +69,44 @@ FORM_SECTIONS = [
 # Create CRUD views
 crud = create_crud(Product, ProductForm, ProductFilter)
 
+# List view - automatic base template handling
 product_list = crud['list'](
     TABLE_CONFIG,
     page_title="Products",
-    create_url="app:product_create",
-    base_template="admin_base.html"  # Optional: custom base template
+    create_url="app:product_create"
 )
 
-product_create = crud['create'](
-    FORM_SECTIONS,
-    page_title="New Product"
-)
+# Form views with automatic base template and readonly support
+def product_create(request):
+    if request.method == 'POST':
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('app:product_list')
+    else:
+        form = ProductForm()
+    
+    return render_with_readonly(request, 'crud/form_view.html', {
+        'form': form,
+        'form_sections': FORM_SECTIONS,
+        'page_title': 'New Product'
+    })
+
+def product_update(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == 'POST':
+        form = ProductForm(request.POST, instance=product)
+        if form.is_valid():
+            form.save()
+            return redirect('app:product_list')
+    else:
+        form = ProductForm(instance=product)
+    
+    return render_with_readonly(request, 'crud/form_view.html', {
+        'form': form,
+        'form_sections': FORM_SECTIONS,
+        'page_title': 'Edit Product'
+    }, readonly_fields=['created_at', 'id'])  # Automatic readonly handling
 ```
 
 ### 2. Advanced Widgets
@@ -120,30 +148,42 @@ urlpatterns = [
 
 ## 🎨 Template Customization
 
-DjCrudX allows flexible template customization:
+DjCrudX provides **automatic base template handling** - no manual context needed!
 
 ### Base Template Configuration
 
 **Global configuration (settings.py):**
 ```python
-# Use your own base template globally
+# Use your own base template globally - automatically applied!
 DJCRUDX_BASE_TEMPLATE = "your_base.html"
 
 # Customize UI colors
 DJCRUDX_UI_COLORS = {
-    'primary': 'blue-500',
-    'primary_hover': 'blue-600', 
-    'primary_text': 'blue-600',
-    'primary_ring': 'blue-500',
-    'primary_border': 'blue-500',
+    'primary': 'orange-500',
+    'primary_hover': 'orange-600', 
+    'primary_text': 'orange-600',
+    'primary_ring': 'orange-500',
+    'primary_border': 'orange-500',
     'secondary': 'slate-500',
     'secondary_hover': 'slate-600'
 }
 ```
 
-**Per-view configuration:**
+**Automatic handling:**
 ```python
-# In your view
+# ✅ Base template automatically added - no manual work!
+from djcrudx.mixins import render_with_readonly
+
+def my_view(request):
+    return render_with_readonly(request, 'crud/form_view.html', {
+        'form': form,
+        # base_template automatically added from settings!
+    })
+```
+
+**Manual override (optional):**
+```python
+# Only if you need different template per view
 context.update({
     "base_template": "special_base.html",  # Overrides global setting
 })
@@ -151,7 +191,7 @@ context.update({
 
 **Priority order:**
 1. View context (`base_template` in context) - highest
-2. Settings (`DJCRUDX_BASE_TEMPLATE`)
+2. Settings (`DJCRUDX_BASE_TEMPLATE`) - **automatic**
 3. Default (`crud/base.html`) - fallback
 
 ### Template Override
@@ -246,14 +286,37 @@ from djcrudx import create_crud_views  # Full version with permissions
 }
 ```
 
-### Readonly Fields
+### Readonly Fields - Automatic Handling
 
 ```python
-product_update = crud['update'](
-    FORM_SECTIONS,
-    readonly_fields=["created_at", "id"],  # These fields will be readonly
-    page_title="Edit Product"
-)
+# ✅ Automatic readonly with render_with_readonly helper
+from djcrudx.mixins import render_with_readonly
+
+def product_update(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == 'POST':
+        form = ProductForm(request.POST, instance=product)
+        if form.is_valid():
+            form.save()
+            return redirect('app:product_list')
+    else:
+        form = ProductForm(instance=product)
+    
+    # Automatic readonly + base template handling!
+    return render_with_readonly(request, 'crud/form_view.html', {
+        'form': form,
+        'form_sections': FORM_SECTIONS,
+        'page_title': 'Edit Product'
+    }, readonly_fields=['created_at', 'id'])  # Auto-applied!
+
+# ✅ Or use ReadonlyFormMixin in class-based views
+from djcrudx.mixins import ReadonlyFormMixin
+
+class ProductUpdateView(ReadonlyFormMixin, UpdateView):
+    model = Product
+    form_class = ProductForm
+    readonly_fields = ['created_at', 'id']  # Automatic!
+    template_name = 'crud/form_view.html'
 ```
 
 ### Custom Filters
@@ -278,6 +341,24 @@ class ProductFilter(django_filters.FilterSet):
 - **Tailwind CSS** - Required for styling (included via CDN in templates)
 - **Alpine.js** - Required for interactive widgets (included via CDN in templates)
 
+## 🔧 Helper Functions
+
+### render_with_readonly()
+Automatic base template and readonly field handling:
+
+```python
+from djcrudx.mixins import render_with_readonly
+
+# Automatic base template + readonly fields
+return render_with_readonly(request, template, context, readonly_fields=['id'])
+```
+
+### Mixins Available
+- **CrudListMixin** - Complete list view with pagination and filtering
+- **ReadonlyFormMixin** - Automatic readonly fields for class-based views
+- **PaginationMixin** - Easy pagination handling
+- **DataTableMixin** - Table generation from configuration
+
 ### Frontend Dependencies
 
 DjCrudX templates include Tailwind CSS and Alpine.js via CDN:
@@ -292,15 +373,16 @@ DjCrudX templates include Tailwind CSS and Alpine.js via CDN:
 
 If you prefer to use your own Tailwind CSS setup, you can override the base template.
 
-## 🔧 Fixed Issues
+## 🚀 Key Features & Improvements
 
-- ✅ Fixed pagination template path (`simple_pagination.html` → `pagination.html`)
-- ✅ Fixed template variable names (`table_headers/table_rows` → `headers/rows`)
-- ✅ Fixed import error in templatetags (`auto_translate` → `smart_translate`)
-- ✅ Fixed missing pagination context variables
-- ✅ Removed non-functional table views and column config buttons
-- ✅ Added configurable base template support
-- ✅ Fixed Polish translations in pagination
+- ✅ **Automatic base template handling** - No manual context needed!
+- ✅ **Automatic readonly fields** - Use `render_with_readonly()` helper
+- ✅ **Smart template inheritance** - `{% extends base_template|default:"crud/base.html" %}`
+- ✅ **UI color customization** - `DJCRUDX_UI_COLORS` in settings
+- ✅ **Fixed pagination** - Correct template paths and variables
+- ✅ **Fixed template tags** - All imports working correctly
+- ✅ **Polish translations** - Built-in i18n support
+- ✅ **Mixin architecture** - Reusable components for custom views
 
 ## 📝 License
 
