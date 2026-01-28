@@ -76,11 +76,6 @@
                                     
                                     {% for form_instance in formset_data.formset %}
                                     <div class="inline-form border p-4 bg-white rounded relative">
-                                        {% if form_instance.non_field_errors %}
-                                        <div class="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded mb-3 text-sm">
-                                            {{ form_instance.non_field_errors }}
-                                        </div>
-                                        {% endif %}
                                         <div class="grid grid-cols-1 md:grid-cols-{{ formset_data.config.columns|default:3 }} gap-4">
                                             {% for field in form_instance %}
                                                 {% if not field.is_hidden and field.name != 'DELETE' %}
@@ -119,6 +114,11 @@
                                             </div>
                                             {% endif %}
                                         </div>
+                                        {% if form_instance.non_field_errors %}
+                                        <div class="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded mt-3 text-sm">
+                                            {{ form_instance.non_field_errors }}
+                                        </div>
+                                        {% endif %}
                                     </div>
                                     {% endfor %}
                                 </div>
