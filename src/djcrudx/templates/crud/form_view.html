@@ -1,5 +1,6 @@
 {% extends base_template|default:"crud/base.html" %}
 {% load static %}
+{% load djcrudx_tags %}
 
 {% block title %}{{ page_title }}{% endblock %}
 
@@ -19,7 +20,7 @@
                     <path d="M5 12l6 6" />
                     <path d="M5 12l6 -6" />
                 </svg>
-                <span>Back to List</span>
+                <span>{% trans "Back to List" %}</span>
             </a>
             {% endif %}
         </div>
@@ -43,11 +44,11 @@
             <div class="flex justify-end space-x-4 pb-6 border-b text-xs">
                 {% if back_url %}
                 <a href="{% url back_url %}" class="px-6 py-2 bg-red-500 text-white rounded hover:bg-red-600">
-                    Cancel
+                    {% trans "Cancel" %}
                 </a>
                 {% endif %}
                 <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 font-semibold">
-                    {{ submit_label|default:"Save" }}
+                    {% trans submit_label|default:"Save" %}
                 </button>
             </div>
 

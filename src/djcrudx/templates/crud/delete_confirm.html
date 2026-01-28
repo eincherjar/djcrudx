@@ -1,4 +1,5 @@
 {% extends base_template|default:"crud/base.html" %}
+{% load djcrudx_tags %}
 
 {% block title %}{{ page_title }}{% endblock %}
 
@@ -14,27 +15,27 @@
                 </div>
                 <div class="ml-3">
                     <h3 class="text-lg font-medium text-gray-900">
-                        Confirm Deletion
+                        {% trans "Confirm Deletion" %}
                     </h3>
                 </div>
             </div>
             
             <div class="mb-6">
                 <p class="text-sm text-gray-600">
-                    Are you sure you want to delete <strong>{{ object }}</strong>?
+                    {% trans "Are you sure you want to delete" %} <strong>{{ object }}</strong>?
                 </p>
                 <p class="text-sm text-red-600 mt-2">
-                    This action cannot be undone.
+                    {% trans "This action cannot be undone." %}
                 </p>
             </div>
             
             <form method="post" class="flex space-x-3">
                 {% csrf_token %}
                 <button type="submit" class="flex-1 bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
-                    Delete
+                    {% trans "Delete" %}
                 </button>
                 <a href="{% url back_url %}" class="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 text-center">
-                    Cancel
+                    {% trans "Cancel" %}
                 </a>
             </form>
         </div>
