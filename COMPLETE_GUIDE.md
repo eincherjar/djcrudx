@@ -230,6 +230,9 @@ class EmployeeForm(forms.ModelForm):
             employee__isnull=True
         ).order_by('first_name', 'last_name')
         
+        # Wyświetl imię i nazwisko lub username
+        self.fields['user'].label_from_instance = lambda obj: obj.get_full_name() or obj.username
+        
         # Filtruj tylko aktywne działy
         self.fields['departments'].queryset = Department.objects.filter(
             name__isnull=False

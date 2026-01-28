@@ -87,25 +87,25 @@
                                                     {{ field }}
                                                 {% endif %}
                                             {% endfor %}
-                                        </div>
-                                        
-                                        {% if formset_data.formset.can_delete %}
-                                        <div class="absolute top-2 right-2">
-                                            {% if form_instance.instance.pk %}
-                                                {{ form_instance.DELETE }}
-                                                <label for="{{ form_instance.DELETE.id_for_label }}" 
-                                                       class="text-red-600 hover:text-red-800 cursor-pointer text-xs">
-                                                    Usuń
-                                                </label>
-                                            {% else %}
-                                                <button type="button" 
-                                                        onclick="deleteInlineForm(this)"
-                                                        class="text-red-600 hover:text-red-800 text-xs">
-                                                    Usuń
-                                                </button>
+                                            
+                                            {% if formset_data.formset.can_delete %}
+                                            <div class="flex items-end">
+                                                {% if form_instance.instance.pk %}
+                                                    {{ form_instance.DELETE }}
+                                                    <label for="{{ form_instance.DELETE.id_for_label }}" 
+                                                           class="text-red-600 hover:text-red-800 cursor-pointer text-xs px-2 py-1 border border-red-300 rounded">
+                                                        Usuń
+                                                    </label>
+                                                {% else %}
+                                                    <button type="button" 
+                                                            onclick="deleteInlineForm(this)"
+                                                            class="text-red-600 hover:text-red-800 text-xs px-2 py-1 border border-red-300 rounded">
+                                                        Usuń
+                                                    </button>
+                                                {% endif %}
+                                            </div>
                                             {% endif %}
                                         </div>
-                                        {% endif %}
                                     </div>
                                     {% endfor %}
                                 </div>
@@ -135,13 +135,14 @@
                                                     {{ field }}
                                                 {% endif %}
                                             {% endfor %}
-                                        </div>
-                                        <div class="absolute top-2 right-2">
-                                            <button type="button" 
-                                                    onclick="deleteInlineForm(this)"
-                                                    class="text-red-600 hover:text-red-800 text-xs">
-                                                Usuń
-                                            </button>
+                                            
+                                            <div class="flex items-end">
+                                                <button type="button" 
+                                                        onclick="deleteInlineForm(this)"
+                                                        class="text-red-600 hover:text-red-800 text-xs px-2 py-1 border border-red-300 rounded">
+                                                    Usuń
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
