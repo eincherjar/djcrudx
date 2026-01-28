@@ -68,8 +68,19 @@
                                 {{ formset_data.formset.management_form }}
                                 
                                 <div id="formset-{{ formset_name }}" class="space-y-4">
+                                    {% if formset_data.formset.non_form_errors %}
+                                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                                        {{ formset_data.formset.non_form_errors }}
+                                    </div>
+                                    {% endif %}
+                                    
                                     {% for form_instance in formset_data.formset %}
                                     <div class="inline-form border p-4 bg-white rounded relative">
+                                        {% if form_instance.non_field_errors %}
+                                        <div class="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded mb-3 text-sm">
+                                            {{ form_instance.non_field_errors }}
+                                        </div>
+                                        {% endif %}
                                         <div class="grid grid-cols-1 md:grid-cols-{{ formset_data.config.columns|default:3 }} gap-4">
                                             {% for field in form_instance %}
                                                 {% if not field.is_hidden and field.name != 'DELETE' %}
@@ -83,7 +94,7 @@
                                                         <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
                                                     {% endif %}
                                                 </div>
-                                                {% else %}
+                                                {% elif field.is_hidden and field.name != 'DELETE' %}
                                                     {{ field }}
                                                 {% endif %}
                                             {% endfor %}
@@ -131,7 +142,7 @@
                                                     </label>
                                                     {{ field }}
                                                 </div>
-                                                {% else %}
+                                                {% elif field.is_hidden and field.name != 'DELETE' %}
                                                     {{ field }}
                                                 {% endif %}
                                             {% endfor %}
