@@ -4,6 +4,7 @@
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.shortcuts import render
+from django.conf import settings
 from .models import Product
 
 def product_delete(request, pk):
@@ -20,6 +21,7 @@ def product_delete(request, pk):
         'object': product,
         'page_title': f'Delete {product.name}',
         'back_url': 'app:product_list',  # URL powrotu
+        'base_template': getattr(settings, 'DJCRUDX_BASE_TEMPLATE', 'crud/base.html'),
     })
 
 # URLs Configuration
