@@ -250,6 +250,7 @@ class EmployeeForm(forms.ModelForm):
 
 ```python
 import django_filters
+from django.db.models import Q
 from djcrudx.widgets import (
     DateRangePickerWidget,
     SingleSelectDropdownWidget,
@@ -259,6 +260,16 @@ from .models import Organization, Employee, Country
 
 class OrganizationFilter(django_filters.FilterSet):
     """Filtry dla tabeli organizacji"""
+    
+    # Globalne wyszukiwanie
+    search = django_filters.CharFilter(
+        method='global_search',
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Szukaj w nazwie, NIP, mieście...',
+            'class': 'form-control'
+        }),
+        label='Szukaj'
+    )
     
     # Wyszukiwanie po nazwie
     name = django_filters.CharFilter(
@@ -308,7 +319,18 @@ class OrganizationFilter(django_filters.FilterSet):
 
     class Meta:
         model = Organization
-        fields = ['name', 'country', 'status', 'is_active', 'founded_date', 'created_at']
+        fields = ['search', 'name', 'country', 'status', 'is_active', 'founded_date', 'created_at']
+    
+    def global_search(self, queryset, name, value):
+        """Globalne wyszukiwanie w wielu polach"""
+        if value:
+            return queryset.filter(
+                Q(name__icontains=value) |
+                Q(vat_number__icontains=value) |
+                Q(city__icontains=value) |
+                Q(country__name__icontains=value)
+            )
+        return queryset
     
     def filter_is_active(self, queryset, name, value):
         """Custom method to handle boolean filtering"""
