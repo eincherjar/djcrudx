@@ -102,11 +102,13 @@
                                             {% if formset_data.formset.can_delete %}
                                             <div class="flex items-end">
                                                 {% if form_instance.instance.pk %}
-                                                    {{ form_instance.DELETE }}
-                                                    <label for="{{ form_instance.DELETE.id_for_label }}" 
-                                                           class="text-red-600 hover:text-red-800 cursor-pointer text-xs px-2 py-1 border border-red-300 rounded">
+                                                    <!-- Hidden checkbox for existing records -->
+                                                    <div style="display: none;">{{ form_instance.DELETE }}</div>
+                                                    <button type="button" 
+                                                            onclick="toggleDeleteCheckbox(this, '{{ form_instance.DELETE.id_for_label }}')"
+                                                            class="text-red-600 hover:text-red-800 text-xs px-2 py-1 border border-red-300 rounded">
                                                         Usuń
-                                                    </label>
+                                                    </button>
                                                 {% else %}
                                                     <button type="button" 
                                                             onclick="deleteInlineForm(this)"
@@ -178,6 +180,29 @@
 <!-- JavaScript for inline formsets -->
 {% if inline_formsets %}
 <script>
+function toggleDeleteCheckbox(button, checkboxId) {
+    const checkbox = document.getElementById(checkboxId);
+    const formDiv = button.closest('.inline-form');
+    
+    if (checkbox.checked) {
+        // Przywróć formularz
+        checkbox.checked = false;
+        formDiv.style.opacity = '1';
+        formDiv.style.pointerEvents = 'auto';
+        button.textContent = 'Usuń';
+        button.classList.remove('bg-green-500', 'border-green-300', 'text-green-600');
+        button.classList.add('text-red-600', 'border-red-300');
+    } else {
+        // Oznacz do usunięcia
+        checkbox.checked = true;
+        formDiv.style.opacity = '0.5';
+        formDiv.style.pointerEvents = 'none';
+        button.textContent = 'Przywróć';
+        button.classList.remove('text-red-600', 'border-red-300');
+        button.classList.add('bg-green-500', 'border-green-300', 'text-white');
+    }
+}
+
 function addInlineForm(formsetName, prefix) {
     const totalForms = document.getElementById('id_' + prefix + '-TOTAL_FORMS');
     const formNum = parseInt(totalForms.value);
@@ -201,25 +226,15 @@ function deleteInlineForm(element) {
     const deleteCheckbox = formDiv.querySelector('input[name$="-DELETE"]');
     
     if (deleteCheckbox) {
-        // Existing object - mark for deletion
-        deleteCheckbox.checked = true;
-        formDiv.style.opacity = '0.5';
-        formDiv.style.pointerEvents = 'none';
-        element.textContent = 'Przywróć';
-        element.onclick = function() {
-            deleteCheckbox.checked = false;
-            formDiv.style.opacity = '1';
-            formDiv.style.pointerEvents = 'auto';
-            element.textContent = 'Usuń';
-            element.onclick = function() { deleteInlineForm(element); };
-        };
+        // Existing object - use toggleDeleteCheckbox logic
+        toggleDeleteCheckbox(element, deleteCheckbox.id);
     } else {
         // New object - remove from DOM
         formDiv.remove();
         
         // Update form indices
-        const formsetName = element.closest('fieldset').querySelector('[id^="formset-"]').id.replace('formset-', '');
-        const prefix = formsetName;
+        const formsetContainer = element.closest('[id^="formset-"]');
+        const prefix = formsetContainer.id.replace('formset-', '');
         const totalForms = document.getElementById('id_' + prefix + '-TOTAL_FORMS');
         if (totalForms) {
             totalForms.value = parseInt(totalForms.value) - 1;
