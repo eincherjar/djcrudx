@@ -43,11 +43,28 @@
             <!-- Action buttons -->
             <div class="flex justify-end space-x-4 pb-6 border-b text-xs">
                 {% if back_url %}
-                <a href="{% url back_url %}" class="px-6 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                <a href="{% url back_url %}"
+                    class="px-3 py-1.5 bg-red-500 text-white rounded hover:bg-red-600 transition ease-in-out duration-200 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="size-4">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                        <path d="M18.364 5.636l-12.728 12.728" />
+                    </svg>
                     {% trans "Cancel" %}
                 </a>
                 {% endif %}
-                <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 font-semibold">
+                <button type="submit"
+                    class="px-3 py-1.5 bg-green-500 text-white rounded hover:bg-green-600 font-semibold transition ease-in-out duration-200 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="size-4">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
+                        <path d="M10 14a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                        <path d="M14 4l0 4l-6 0l0 -4" />
+                    </svg>
                     {% trans submit_label|default:"Save" %}
                 </button>
             </div>
@@ -58,118 +75,145 @@
                 <legend class="text-lg font-medium px-2 text-gray-700">{{ section.title }}</legend>
                 <div class="grid grid-cols-1 md:grid-cols-{{ section.columns|default:3 }} gap-4 mt-4">
                     {% for field_name in section.fields %}
-                        {% if field_name == "inline_config" %}
-                            <!-- Render all inline formsets here -->
-                            {% for formset_name, formset_data in inline_formsets.items %}
-                            <div class="md:col-span-{{ section.columns|default:3 }} mt-4">
-                                {% if formset_data.config.section_title %}
-                                <h4 class="text-lg font-medium text-gray-700 mb-4">{{ formset_data.config.section_title }}</h4>
-                                {% endif %}
-                                
-                                {{ formset_data.formset.management_form }}
-                                
-                                <div id="formset-{{ formset_name }}" class="space-y-4">
-                                    {% if formset_data.formset.non_form_errors %}
-                                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                                        {{ formset_data.formset.non_form_errors }}
-                                    </div>
-                                    {% endif %}
-                                    
-                                    {% for form_instance in formset_data.formset %}
-                                    <div class="inline-form border p-4 bg-white rounded relative">
-                                        <div class="grid grid-cols-1 md:grid-cols-{{ formset_data.config.columns|default:3 }} gap-4">
-                                            {% for field in form_instance %}
-                                                {% if not field.is_hidden and field.name != 'DELETE' %}
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                                                        {{ field.label }}
-                                                        {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
-                                                    </label>
-                                                    {{ field }}
-                                                    {% if field.errors %}
-                                                        <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
-                                                    {% endif %}
-                                                </div>
-                                                {% elif field.is_hidden and field.name != 'DELETE' %}
-                                                    {{ field }}
-                                                {% endif %}
-                                            {% endfor %}
-                                            
-                                            {% if formset_data.formset.can_delete %}
-                                            <div class="flex items-end">
-                                                {% if form_instance.instance.pk %}
-                                                    <!-- Hidden checkbox for existing records -->
-                                                    <div style="display: none;">{{ form_instance.DELETE }}</div>
-                                                    <button type="button" 
-                                                            onclick="toggleDeleteCheckbox(this, '{{ form_instance.DELETE.id_for_label }}')"
-                                                            class="text-red-600 hover:text-red-800 text-xs px-2 py-1 border border-red-300 rounded">
-                                                        Usuń
-                                                    </button>
-                                                {% else %}
-                                                    <button type="button" 
-                                                            onclick="deleteInlineForm(this)"
-                                                            class="text-red-600 hover:text-red-800 text-xs px-2 py-1 border border-red-300 rounded">
-                                                        Usuń
-                                                    </button>
-                                                {% endif %}
-                                            </div>
-                                            {% endif %}
-                                        </div>
-                                        {% if form_instance.non_field_errors %}
-                                        <div class="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded mt-3 text-sm">
-                                            {{ form_instance.non_field_errors }}
-                                        </div>
+                    {% if field_name == "inline_config" %}
+                    <!-- Render all inline formsets here -->
+                    {% for formset_name, formset_data in inline_formsets.items %}
+                    <div class="md:col-span-{{ section.columns|default:3 }} mt-4">
+                        {% if formset_data.config.section_title %}
+                        <h4 class="text-lg font-medium text-gray-700 mb-4">{{ formset_data.config.section_title }}</h4>
+                        {% endif %}
+
+                        {{ formset_data.formset.management_form }}
+
+                        <div id="formset-{{ formset_name }}" class="space-y-4">
+                            {% if formset_data.formset.non_form_errors %}
+                            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                                {{ formset_data.formset.non_form_errors }}
+                            </div>
+                            {% endif %}
+
+                            {% for form_instance in formset_data.formset %}
+                            <div class="inline-form border p-4 bg-white rounded relative">
+                                <div
+                                    class="grid grid-cols-1 md:grid-cols-{{ formset_data.config.columns|default:3 }} gap-4">
+                                    {% for field in form_instance %}
+                                    {% if not field.is_hidden and field.name != 'DELETE' %}
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                                            {{ field.label }}
+                                            {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                        </label>
+                                        {{ field }}
+                                        {% if field.errors %}
+                                        <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
                                         {% endif %}
                                     </div>
+                                    {% elif field.is_hidden and field.name != 'DELETE' %}
+                                    {{ field }}
+                                    {% endif %}
                                     {% endfor %}
+
+                                    {% if formset_data.formset.can_delete %}
+                                    <div class="flex items-end">
+                                        {% if form_instance.instance.pk %}
+                                        <!-- Hidden checkbox for existing records -->
+                                        <div style="display: none;">{{ form_instance.DELETE }}</div>
+                                        <button type="button"
+                                            onclick="toggleDeleteCheckbox(this, '{{ form_instance.DELETE.id_for_label }}')"
+                                            class="text-red-600 hover:text-red-800 text-xs px-2 py-1 border border-red-300 rounded">
+                                            Usuń
+                                        </button>
+                                        {% else %}
+                                        <button type="button" onclick="deleteInlineForm(this)"
+                                            class="text-red-600 hover:text-red-800 text-xs px-2 py-1 border border-red-300 rounded">
+                                            Usuń
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
                                 </div>
-                                
-                                <div class="mt-4">
-                                    <button type="button" 
-                                            onclick="addInlineForm('{{ formset_name }}', '{{ formset_data.formset.prefix }}')"
-                                            class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm">
-                                        Dodaj {{ formset_data.config.add_button_text|default:"element" }}
-                                    </button>
+                                {% if form_instance.non_field_errors %}
+                                <div
+                                    class="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded mt-3 text-sm">
+                                    {{ form_instance.non_field_errors }}
                                 </div>
-                                
-                                <!-- Empty form template -->
-                                <div id="empty-form-{{ formset_name }}" style="display: none;">
-                                    <div class="inline-form border p-4 bg-white rounded relative">
-                                        <div class="grid grid-cols-1 md:grid-cols-{{ formset_data.config.columns|default:3 }} gap-4">
-                                            {% for field in formset_data.formset.empty_form %}
-                                                {% if not field.is_hidden and field.name != 'DELETE' %}
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                                                        {{ field.label }}
-                                                        {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
-                                                    </label>
-                                                    {{ field }}
-                                                </div>
-                                                {% elif field.is_hidden and field.name != 'DELETE' %}
-                                                    {{ field }}
-                                                {% endif %}
-                                            {% endfor %}
-                                            
-                                            <div class="flex items-end">
-                                                <button type="button" 
-                                                        onclick="deleteInlineForm(this)"
-                                                        class="text-red-600 hover:text-red-800 text-xs px-2 py-1 border border-red-300 rounded">
-                                                    Usuń
-                                                </button>
-                                            </div>
-                                        </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="button"
+                                onclick="addInlineForm('{{ formset_name }}', '{{ formset_data.formset.prefix }}')"
+                                class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs transition ease-in-out duration-200 flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="size-4">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M8.56 3.69a9 9 0 0 0 -2.92 1.95" />
+                                    <path d="M3.69 8.56a9 9 0 0 0 -.69 3.44" />
+                                    <path d="M3.69 15.44a9 9 0 0 0 1.95 2.92" />
+                                    <path d="M8.56 20.31a9 9 0 0 0 3.44 .69" />
+                                    <path d="M15.44 20.31a9 9 0 0 0 2.92 -1.95" />
+                                    <path d="M20.31 15.44a9 9 0 0 0 .69 -3.44" />
+                                    <path d="M20.31 8.56a9 9 0 0 0 -1.95 -2.92" />
+                                    <path d="M15.44 3.69a9 9 0 0 0 -3.44 -.69" />
+                                    <path d="M9 12h6" />
+                                    <path d="M12 9v6" />
+                                </svg>
+                                <span>
+                                    {% trans "Add" %}
+                                    {{ formset_data.config.add_button_text|default:"element" }}
+                                </span>
+                            </button>
+                        </div>
+
+                        <!-- Empty form template -->
+                        <div id="empty-form-{{ formset_name }}" style="display: none;">
+                            <div class="inline-form border p-4 bg-white rounded relative">
+                                <div
+                                    class="grid grid-cols-1 md:grid-cols-{{ formset_data.config.columns|default:3 }} gap-4">
+                                    {% for field in formset_data.formset.empty_form %}
+                                    {% if not field.is_hidden and field.name != 'DELETE' %}
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                                            {{ field.label }}
+                                            {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                        </label>
+                                        {{ field }}
+                                    </div>
+                                    {% elif field.is_hidden and field.name != 'DELETE' %}
+                                    {{ field }}
+                                    {% endif %}
+                                    {% endfor %}
+
+                                    <div class="flex items-end">
+                                        <button type="button" onclick="deleteInlineForm(this)"
+                                            class="text-red-600 hover:text-red-800 text-xs px-2 py-1 border border-red-300 rounded transition ease-in-out duration-200 flex items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                <path
+                                                    d="M19 2a3 3 0 0 1 3 3v14a3 3 0 0 1 -3 3h-14a3 3 0 0 1 -3 -3v-14a3 3 0 0 1 3 -3zm-4 9h-6l-.117 .007a1 1 0 0 0 .117 1.993h6l.117 -.007a1 1 0 0 0 -.117 -1.993z" />
+                                            </svg>
+                                            <span>
+                                                {% trans "Delete" %}
+                                            </span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-                            {% endfor %}
-                        {% else %}
-                            <!-- Regular form field -->
-                            {% for field in form %}
-                            {% if field.name == field_name %}
-                            {% include 'crud/form_field.html' %}
-                            {% endif %}
-                            {% endfor %}
-                        {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <!-- Regular form field -->
+                    {% for field in form %}
+                    {% if field.name == field_name %}
+                    {% include 'crud/form_field.html' %}
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
                     {% endfor %}
                 </div>
             </fieldset>
@@ -181,67 +225,67 @@
 <!-- JavaScript for inline formsets -->
 {% if inline_formsets %}
 <script>
-function toggleDeleteCheckbox(button, checkboxId) {
-    const checkbox = document.getElementById(checkboxId);
-    const formDiv = button.closest('.inline-form');
-    
-    if (checkbox.checked) {
-        // Przywróć formularz
-        checkbox.checked = false;
-        formDiv.style.opacity = '1';
-        formDiv.style.pointerEvents = 'auto';
-        button.textContent = 'Usuń';
-        button.classList.remove('bg-green-500', 'border-green-300', 'text-green-600');
-        button.classList.add('text-red-600', 'border-red-300');
-    } else {
-        // Oznacz do usunięcia
-        checkbox.checked = true;
-        formDiv.style.opacity = '0.5';
-        formDiv.style.pointerEvents = 'none';
-        button.textContent = 'Przywróć';
-        button.classList.remove('text-red-600', 'border-red-300');
-        button.classList.add('bg-green-500', 'border-green-300', 'text-white');
-    }
-}
+    function toggleDeleteCheckbox(button, checkboxId) {
+        const checkbox = document.getElementById(checkboxId);
+        const formDiv = button.closest('.inline-form');
 
-function addInlineForm(formsetName, prefix) {
-    const totalForms = document.getElementById('id_' + prefix + '-TOTAL_FORMS');
-    const formNum = parseInt(totalForms.value);
-    const emptyForm = document.getElementById('empty-form-' + formsetName);
-    const formContainer = document.getElementById('formset-' + formsetName);
-    
-    // Clone empty form and replace __prefix__ with form number
-    const newFormHtml = emptyForm.innerHTML.replace(/__prefix__/g, formNum);
-    
-    // Create new form element
-    const formDiv = document.createElement('div');
-    formDiv.innerHTML = newFormHtml;
-    formContainer.appendChild(formDiv.firstElementChild);
-    
-    // Update total forms count
-    totalForms.value = formNum + 1;
-}
-
-function deleteInlineForm(element) {
-    const formDiv = element.closest('.inline-form');
-    const deleteCheckbox = formDiv.querySelector('input[name$="-DELETE"]');
-    
-    if (deleteCheckbox) {
-        // Existing object - use toggleDeleteCheckbox logic
-        toggleDeleteCheckbox(element, deleteCheckbox.id);
-    } else {
-        // New object - remove from DOM
-        formDiv.remove();
-        
-        // Update form indices
-        const formsetContainer = element.closest('[id^="formset-"]');
-        const prefix = formsetContainer.id.replace('formset-', '');
-        const totalForms = document.getElementById('id_' + prefix + '-TOTAL_FORMS');
-        if (totalForms) {
-            totalForms.value = parseInt(totalForms.value) - 1;
+        if (checkbox.checked) {
+            // Przywróć formularz
+            checkbox.checked = false;
+            formDiv.style.opacity = '1';
+            formDiv.style.pointerEvents = 'auto';
+            button.textContent = 'Usuń';
+            button.classList.remove('bg-green-500', 'border-green-300', 'text-green-600');
+            button.classList.add('text-red-600', 'border-red-300');
+        } else {
+            // Oznacz do usunięcia
+            checkbox.checked = true;
+            formDiv.style.opacity = '0.5';
+            formDiv.style.pointerEvents = 'none';
+            button.textContent = 'Przywróć';
+            button.classList.remove('text-red-600', 'border-red-300');
+            button.classList.add('bg-green-500', 'border-green-300', 'text-white');
         }
     }
-}
+
+    function addInlineForm(formsetName, prefix) {
+        const totalForms = document.getElementById('id_' + prefix + '-TOTAL_FORMS');
+        const formNum = parseInt(totalForms.value);
+        const emptyForm = document.getElementById('empty-form-' + formsetName);
+        const formContainer = document.getElementById('formset-' + formsetName);
+
+        // Clone empty form and replace __prefix__ with form number
+        const newFormHtml = emptyForm.innerHTML.replace(/__prefix__/g, formNum);
+
+        // Create new form element
+        const formDiv = document.createElement('div');
+        formDiv.innerHTML = newFormHtml;
+        formContainer.appendChild(formDiv.firstElementChild);
+
+        // Update total forms count
+        totalForms.value = formNum + 1;
+    }
+
+    function deleteInlineForm(element) {
+        const formDiv = element.closest('.inline-form');
+        const deleteCheckbox = formDiv.querySelector('input[name$="-DELETE"]');
+
+        if (deleteCheckbox) {
+            // Existing object - use toggleDeleteCheckbox logic
+            toggleDeleteCheckbox(element, deleteCheckbox.id);
+        } else {
+            // New object - remove from DOM
+            formDiv.remove();
+
+            // Update form indices
+            const formsetContainer = element.closest('[id^="formset-"]');
+            const prefix = formsetContainer.id.replace('formset-', '');
+            const totalForms = document.getElementById('id_' + prefix + '-TOTAL_FORMS');
+            if (totalForms) {
+                totalForms.value = parseInt(totalForms.value) - 1;
+            }
+        }
+    }
 </script>
 {% endif %}
 {% endblock %}
