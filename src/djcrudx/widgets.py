@@ -705,3 +705,17 @@ class TextInputWidget(forms.TextInput):
         if attrs:
             default_attrs.update(attrs)
         super().__init__(attrs=default_attrs)
+
+
+class TextareaWidget(forms.Textarea):
+    """Custom widget dla textarea z pełną szerokością i jednolitym stylem"""
+
+    def __init__(self, attrs=None):
+        ui_colors = get_ui_colors()
+        default_attrs = {
+            "class": f"w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-{ui_colors['primary_ring']}",
+            "rows": 4
+        }
+        if attrs:
+            default_attrs.update(attrs)
+        super().__init__(attrs=default_attrs)
