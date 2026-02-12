@@ -13,7 +13,7 @@
                 {% if extra_buttons %}
                     {% for button in extra_buttons %}
                         <a href="{{ button.url }}"
-                            class="px-3 py-1.5 bg-{{ button._bg_color }} hover:bg-{{ button._hover_color }} text-white text-xs rounded transition ease-in-out duration-200 flex items-center gap-2">
+                            class="px-3 py-1.5 bg-{{ button.bg_color }} hover:bg-{{ button.hover_color }} text-white text-xs rounded transition ease-in-out duration-200 flex items-center gap-2">
                             {% if button.icon %}{{ button.icon|safe }}{% endif %}
                             <span>{{ button.label }}</span>
                         </a>
