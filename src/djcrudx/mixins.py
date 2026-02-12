@@ -67,6 +67,20 @@ def render_with_readonly(request, template_name, context, readonly_fields=None, 
             'secondary_hover': 'gray-600'
         })
     
+    # Process extra_buttons to add color info
+    if 'extra_buttons' in context:
+        ui_colors = context['ui_colors']
+        for button in context['extra_buttons']:
+            style = button.get('style', 'secondary')
+            # Check if style exists in ui_colors
+            if style in ui_colors and f"{style}_hover" in ui_colors:
+                button['_bg_color'] = ui_colors[style]
+                button['_hover_color'] = ui_colors[f"{style}_hover"]
+            else:
+                # Default to secondary
+                button['_bg_color'] = ui_colors['secondary']
+                button['_hover_color'] = ui_colors['secondary_hover']
+    
     # Add extra scripts if provided
     if extra_scripts:
         context['extra_scripts'] = extra_scripts
