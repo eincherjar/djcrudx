@@ -143,9 +143,11 @@ class InlineFormsetField(forms.Field):
 class MultiSelectDropdownWidget(Widget):
     """Custom widget dla multiselect dropdown z checkboxami"""
 
-    def __init__(self, choices=(), attrs=None):
+    def __init__(self, choices=(), attrs=None, add_url=None, add_label='+ Dodaj'):
         super().__init__(attrs)
         self.choices = choices
+        self.default_add_url = add_url
+        self.default_add_label = add_label
 
     def format_value(self, value):
         if value is None:
@@ -166,6 +168,10 @@ class MultiSelectDropdownWidget(Widget):
 
         selected_values = self.format_value(value)
         ui_colors = get_ui_colors()
+        
+        # Pobierz data-add-url i data-add-label z attrs lub użyj domyślnych
+        add_url = attrs.pop('data-add-url', None) or self.default_add_url
+        add_label = attrs.pop('data-add-label', None) or self.default_add_label
 
         # Pobierz choices z widget lub z bound field
         choices = getattr(self, "choices", [])
@@ -190,6 +196,20 @@ class MultiSelectDropdownWidget(Widget):
                     <input type="checkbox" name="{name}" value="{option_value}" {checked}>
                     <span class="text-xs">{option_label}</span>
                 </label>
+            '''
+        
+        # Dodaj przycisk "Dodaj" jeśli jest add_url
+        add_button_html = ""
+        if add_url:
+            add_button_html = f'''
+                <div class="p-2 border-t">
+                    <a href="{add_url}" target="_blank" class="flex items-center justify-center gap-1 px-3 py-1.5 text-xs bg-green-500 text-white rounded hover:bg-green-600">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        <span>{add_label}</span>
+                    </a>
+                </div>
             '''
 
         # Tekst wyświetlany w dropdown
@@ -222,6 +242,7 @@ class MultiSelectDropdownWidget(Widget):
                     <div class="max-h-48 overflow-y-auto">
                         {options_html}
                     </div>
+                    {add_button_html}
                 </div>
             </div>
         """
@@ -485,9 +506,11 @@ class ColoredSelectDropdownWidget(Widget):
 class SingleSelectDropdownWidget(Widget):
     """Custom widget dla single select dropdown z radio buttonami i automatycznym wykrywaniem kolorów"""
 
-    def __init__(self, choices=(), attrs=None):
+    def __init__(self, choices=(), attrs=None, add_url=None, add_label='+ Dodaj'):
         super().__init__(attrs)
         self.choices = choices
+        self.default_add_url = add_url
+        self.default_add_label = add_label
 
     def format_value(self, value):
         if value is None:
@@ -505,6 +528,10 @@ class SingleSelectDropdownWidget(Widget):
 
         selected_value = self.format_value(value)
         ui_colors = get_ui_colors()
+        
+        # Pobierz data-add-url i data-add-label z attrs lub użyj domyślnych
+        add_url = attrs.pop('data-add-url', None) or self.default_add_url
+        add_label = attrs.pop('data-add-label', None) or self.default_add_label
 
         # Pobierz choices z widget lub z bound field
         choices = getattr(self, "choices", [])
@@ -546,6 +573,20 @@ class SingleSelectDropdownWidget(Widget):
                     <span class="text-xs">{option_label}</span>
                 </label>
             '''
+        
+        # Dodaj przycisk "Dodaj" jeśli jest add_url
+        add_button_html = ""
+        if add_url:
+            add_button_html = f'''
+                <div class="p-2 border-t">
+                    <a href="{add_url}" target="_blank" class="flex items-center justify-center gap-1 px-3 py-1.5 text-xs bg-green-500 text-white rounded hover:bg-green-600">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        <span>{add_label}</span>
+                    </a>
+                </div>
+            '''
 
         # Dodaj id do kontenera
         field_id = attrs.get("id", f"id_{name}")
@@ -570,6 +611,7 @@ class SingleSelectDropdownWidget(Widget):
                     <div class="max-h-48 overflow-y-auto">
                         {options_html}
                     </div>
+                    {add_button_html}
                 </div>
             </div>
         """
