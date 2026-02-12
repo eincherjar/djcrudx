@@ -55,6 +55,18 @@ def render_with_readonly(request, template_name, context, readonly_fields=None, 
     # Add base template
     context = add_base_template_context(context)
     
+    # Add UI colors
+    if "ui_colors" not in context:
+        context["ui_colors"] = getattr(settings, 'DJCRUDX_UI_COLORS', {
+            'primary': 'blue-500',
+            'primary_hover': 'blue-600',
+            'primary_text': 'blue-600',
+            'primary_ring': 'blue-500',
+            'primary_border': 'blue-500',
+            'secondary': 'gray-500',
+            'secondary_hover': 'gray-600'
+        })
+    
     # Add extra scripts if provided
     if extra_scripts:
         context['extra_scripts'] = extra_scripts
