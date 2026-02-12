@@ -233,8 +233,12 @@ class MultiSelectDropdownWidget(Widget):
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div x-show="open" x-transition class="absolute z-50 w-full min-w-40 mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-hidden dropdown-menu"
-                     :class="$el.getBoundingClientRect().bottom + 250 > window.innerHeight ? 'bottom-full mb-1' : 'top-full mt-1'"
+                <div x-show="open" x-transition class="fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-hidden dropdown-menu"
+                     x-bind:style="{
+                         top: $el.previousElementSibling.getBoundingClientRect().bottom + window.scrollY + 4 + 'px',
+                         left: $el.previousElementSibling.getBoundingClientRect().left + window.scrollX + 'px',
+                         width: $el.previousElementSibling.offsetWidth + 'px'
+                     }"
                      @change="{multiselect_js}">
                     <div class="p-2 border-b">
                         <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" onkeyup="filterOptions(this)">
@@ -602,8 +606,12 @@ class SingleSelectDropdownWidget(Widget):
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div x-show="open" x-transition class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-hidden dropdown-menu"
-                     :class="$el.getBoundingClientRect().bottom + 250 > window.innerHeight ? 'bottom-full mb-1' : 'top-full mt-1'"
+                <div x-show="open" x-transition class="fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-hidden dropdown-menu"
+                     x-bind:style="{
+                         top: $el.previousElementSibling.getBoundingClientRect().bottom + window.scrollY + 4 + 'px',
+                         left: $el.previousElementSibling.getBoundingClientRect().left + window.scrollX + 'px',
+                         width: $el.previousElementSibling.offsetWidth + 'px'
+                     }"
                      @change="{singleselect_js}">
                     <div class="p-2 border-b">
                         <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" onkeyup="filterOptions(this)">
