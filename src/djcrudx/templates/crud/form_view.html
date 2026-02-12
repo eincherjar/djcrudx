@@ -12,16 +12,19 @@
             <div class="flex gap-2">
                 {% if extra_buttons %}
                     {% for button in extra_buttons %}
+                        {% with style_key=button.style|default:'secondary' %}
+                        {% with bg_color=ui_colors|get_item:style_key|default:ui_colors.secondary %}
+                        {% with hover_color=ui_colors|get_item:style_key|add:'_hover'|default:ui_colors.secondary_hover %}
                         <a href="{{ button.url }}"
-                            class="px-4 py-1 text-white text-xs rounded transition ease-in-out duration-200 flex items-center gap-1
-                            {% if button.style == 'primary' %}bg-{{ ui_colors.primary }} hover:bg-{{ ui_colors.primary_hover }}
-                            {% elif button.style == 'secondary' %}bg-{{ ui_colors.secondary }} hover:bg-{{ ui_colors.secondary_hover }}
-                            {% else %}bg-{{ ui_colors.secondary }} hover:bg-{{ ui_colors.secondary_hover }}{% endif %}">
+                            class="px-4 py-1 bg-{{ bg_color }} hover:bg-{{ hover_color }} text-white text-xs rounded transition ease-in-out duration-200 flex items-center gap-1">
                             {% if button.icon %}
                                 {{ button.icon|safe }}
                             {% endif %}
                             <span>{{ button.label }}</span>
                         </a>
+                        {% endwith %}
+                        {% endwith %}
+                        {% endwith %}
                     {% endfor %}
                 {% endif %}
                 {% if back_url %}
