@@ -234,11 +234,7 @@ class MultiSelectDropdownWidget(Widget):
                     </svg>
                 </button>
                 <div x-show="open" x-transition class="fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-hidden dropdown-menu"
-                     x-bind:style="{
-                         top: $el.previousElementSibling.getBoundingClientRect().bottom + window.scrollY + 4 + 'px',
-                         left: $el.previousElementSibling.getBoundingClientRect().left + window.scrollX + 'px',
-                         width: $el.previousElementSibling.offsetWidth + 'px'
-                     }"
+                     x-bind:style="'top: ' + ($el.previousElementSibling.getBoundingClientRect().bottom + window.scrollY + 4) + 'px; left: ' + ($el.previousElementSibling.getBoundingClientRect().left + window.scrollX) + 'px; width: ' + $el.previousElementSibling.offsetWidth + 'px'"
                      @change="{multiselect_js}">
                     <div class="p-2 border-b">
                         <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" onkeyup="filterOptions(this)">
@@ -599,19 +595,27 @@ class SingleSelectDropdownWidget(Widget):
         singleselect_js = "const radio = $el.querySelector('input[type=radio]:checked'); selectedText = radio ? radio.nextElementSibling.textContent : 'Wybierz opcję...'; open = false;"
 
         html = f"""
-            <div class="relative" id="{field_id}_container" x-data="{{ open: false, selectedText: '{selected_label}' }}" @click.outside="open = false">
-                <button type="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-{ui_colors["primary_ring"]} flex items-center justify-between gap-2" @click="open = !open">
+            <div class="relative" id="{field_id}_container" x-data="{{ 
+                open: false, 
+                selectedText: '{selected_label}',
+                updatePosition() {{
+                    if (this.open) {{
+                        const btn = this.$refs.button;
+                        const menu = this.$refs.menu;
+                        const rect = btn.getBoundingClientRect();
+                        menu.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+                        menu.style.left = (rect.left + window.scrollX) + 'px';
+                        menu.style.width = rect.width + 'px';
+                    }}
+                }}
+            }}" @click.outside="open = false">
+                <button type="button" x-ref="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-{ui_colors["primary_ring"]} flex items-center justify-between gap-2" @click="open = !open; $nextTick(() => updatePosition())">
                     <span class="truncate text-xs" x-text="selectedText">{selected_label}</span>
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div x-show="open" x-transition class="fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-hidden dropdown-menu"
-                     x-bind:style="{
-                         top: $el.previousElementSibling.getBoundingClientRect().bottom + window.scrollY + 4 + 'px',
-                         left: $el.previousElementSibling.getBoundingClientRect().left + window.scrollX + 'px',
-                         width: $el.previousElementSibling.offsetWidth + 'px'
-                     }"
+                <div x-show="open" x-ref="menu" x-transition class="fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-hidden"
                      @change="{singleselect_js}">
                     <div class="p-2 border-b">
                         <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" onkeyup="filterOptions(this)">
