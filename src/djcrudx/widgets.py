@@ -8,20 +8,24 @@ from django.forms import inlineformset_factory
 
 def get_ui_colors():
     """Pobierz kolory UI z ustawień Django"""
-    return getattr(settings, 'DJCRUDX_UI_COLORS', {
-        'primary': 'blue-500',
-        'primary_hover': 'blue-600',
-        'primary_text': 'blue-600',
-        'primary_ring': 'blue-500',
-        'primary_border': 'blue-500',
-        'secondary': 'gray-500',
-        'secondary_hover': 'gray-600'
-    })
+    return getattr(
+        settings,
+        "DJCRUDX_UI_COLORS",
+        {
+            "primary": "blue-500",
+            "primary_hover": "blue-600",
+            "primary_text": "blue-600",
+            "primary_ring": "blue-500",
+            "primary_border": "blue-500",
+            "secondary": "gray-500",
+            "secondary_hover": "gray-600",
+        },
+    )
 
 
 class InlineFormsetWidget(Widget):
     """Universal widget for inline formsets - add/edit/delete related objects"""
-    
+
     def __init__(self, model, related_model, fields, extra=3, can_delete=True, form_class=None, attrs=None):
         super().__init__(attrs)
         self.model = model
@@ -31,71 +35,65 @@ class InlineFormsetWidget(Widget):
         self.can_delete = can_delete
         self.form_class = form_class
         self.formset_class = None
-        
+
     def get_formset_class(self):
         """Create formset class if not exists"""
         if not self.formset_class:
             self.formset_class = inlineformset_factory(
-                self.model,
-                self.related_model,
-                form=self.form_class,
-                fields=self.fields,
-                extra=self.extra,
-                can_delete=self.can_delete,
-                can_delete_extra=True
+                self.model, self.related_model, form=self.form_class, fields=self.fields, extra=self.extra, can_delete=self.can_delete, can_delete_extra=True
             )
         return self.formset_class
-    
+
     def render(self, name, value, attrs=None, renderer=None):
         """Render inline formset"""
         if attrs is None:
             attrs = {}
-            
+
         # Get formset instance
         formset_class = self.get_formset_class()
-        
+
         # Create empty formset for rendering structure
         formset = formset_class()
-        
+
         html = f'''
         <div class="inline-formset" data-formset-prefix="{formset.prefix}">
             <div class="formset-forms" id="formset-{name}">
                 <!-- Forms will be rendered here by template -->
             </div>
-            
+
             <div class="formset-controls mt-4">
-                <button type="button" 
+                <button type="button"
                         class="add-form-btn px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
                         onclick="addInlineForm('{name}', '{formset.prefix}')">
                     Dodaj {self.related_model._meta.verbose_name}
                 </button>
             </div>
-            
+
             <!-- Hidden empty form template -->
             <div id="empty-form-{name}" style="display: none;">
                 <!-- Empty form template will be here -->
             </div>
         </div>
-        
+
         <script>
         function addInlineForm(fieldName, prefix) {{
             const totalForms = document.getElementById('id_' + prefix + '-TOTAL_FORMS');
             const formNum = parseInt(totalForms.value);
             const emptyForm = document.getElementById('empty-form-' + fieldName);
             const formContainer = document.getElementById('formset-' + fieldName);
-            
+
             // Clone empty form and replace __prefix__ with form number
             const newForm = emptyForm.innerHTML.replace(/__prefix__/g, formNum);
-            
+
             // Add new form to container
             const formDiv = document.createElement('div');
             formDiv.className = 'inline-form border p-4 mb-4 bg-white rounded';
             formDiv.innerHTML = newForm;
             formContainer.appendChild(formDiv);
-            
+
             // Update total forms count
             totalForms.value = formNum + 1;
-            
+
             // Add delete functionality
             const deleteBtn = formDiv.querySelector('.delete-form-btn');
             if (deleteBtn) {{
@@ -104,7 +102,7 @@ class InlineFormsetWidget(Widget):
                 }};
             }}
         }}
-        
+
         function deleteInlineForm(element) {{
             const formDiv = element.closest('.inline-form');
             const deleteCheckbox = formDiv.querySelector('input[name$="-DELETE"]');
@@ -117,24 +115,17 @@ class InlineFormsetWidget(Widget):
         }}
         </script>
         '''
-        
+
         return mark_safe(html)
 
 
 class InlineFormsetField(forms.Field):
     """Field for handling inline formsets"""
-    
+
     def __init__(self, model, related_model, fields, extra=3, can_delete=True, form_class=None, **kwargs):
-        self.widget = InlineFormsetWidget(
-            model=model,
-            related_model=related_model, 
-            fields=fields,
-            extra=extra,
-            can_delete=can_delete,
-            form_class=form_class
-        )
+        self.widget = InlineFormsetWidget(model=model, related_model=related_model, fields=fields, extra=extra, can_delete=can_delete, form_class=form_class)
         super().__init__(**kwargs)
-        
+
     def clean(self, value):
         # Validation will be handled by the formset itself
         return value
@@ -143,7 +134,7 @@ class InlineFormsetField(forms.Field):
 class MultiSelectDropdownWidget(Widget):
     """Custom widget dla multiselect dropdown z checkboxami"""
 
-    def __init__(self, choices=(), attrs=None, add_url=None, add_label='+ Dodaj'):
+    def __init__(self, choices=(), attrs=None, add_url=None, add_label="+ Dodaj"):
         super().__init__(attrs)
         self.choices = choices
         self.default_add_url = add_url
@@ -168,10 +159,10 @@ class MultiSelectDropdownWidget(Widget):
 
         selected_values = self.format_value(value)
         ui_colors = get_ui_colors()
-        
+
         # Pobierz data-add-url i data-add-label z attrs lub użyj domyślnych
-        add_url = attrs.pop('data-add-url', None) or self.default_add_url
-        add_label = attrs.pop('data-add-label', None) or self.default_add_label
+        add_url = attrs.pop("data-add-url", None) or self.default_add_url
+        add_label = attrs.pop("data-add-label", None) or self.default_add_label
 
         # Pobierz choices z widget lub z bound field
         choices = getattr(self, "choices", [])
@@ -197,7 +188,7 @@ class MultiSelectDropdownWidget(Widget):
                     <span class="text-xs">{option_label}</span>
                 </label>
             '''
-        
+
         # Dodaj przycisk "Dodaj" jeśli jest add_url
         add_button_html = ""
         if add_url:
@@ -213,9 +204,7 @@ class MultiSelectDropdownWidget(Widget):
             '''
 
         # Tekst wyświetlany w dropdown
-        display_text = (
-            ", ".join(selected_labels) if selected_labels else "Wybierz opcje..."
-        )
+        display_text = ", ".join(selected_labels) if selected_labels else "Wybierz opcje..."
         if len(display_text) > 30:
             display_text = f"{len(selected_labels)} wybranych"
 
@@ -226,15 +215,27 @@ class MultiSelectDropdownWidget(Widget):
         multiselect_js = "const checkboxes = $el.querySelectorAll('input[type=checkbox]:checked'); const labels = Array.from(checkboxes).map(cb => cb.nextElementSibling.textContent); if (labels.length === 0) { selectedText = 'Wybierz opcje...'; } else if (labels.join(', ').length > 30) { selectedText = labels.length + ' wybranych'; } else { selectedText = labels.join(', '); }"
 
         html = f"""
-            <div class="relative" id="{field_id}_container" x-data="{{ open: false, selectedText: '{display_text}' }}" @click.outside="open = false">
-                <button type="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-{ui_colors['primary_ring']} flex items-center justify-between gap-2" @click="open = !open">
+            <div class="relative" id="{field_id}_container" x-data="{{
+                open: false,
+                selectedText: '{display_text}',
+                updatePosition() {{
+                    if (this.open) {{
+                        const btn = this.$refs.button;
+                        const menu = this.$refs.menu;
+                        const rect = btn.getBoundingClientRect();
+                        menu.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+                        menu.style.left = (rect.left + window.scrollX) + 'px';
+                        menu.style.width = rect.width + 'px';
+                    }}
+                }}
+            }}" @click.outside="open = false">
+                <button type="button" x-ref="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-{ui_colors["primary_ring"]} flex items-center justify-between gap-2" @click="open = !open; $nextTick(() => updatePosition())">
                     <span class="truncate text-xs" x-text="selectedText">{display_text}</span>
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div x-show="open" x-transition class="fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-hidden dropdown-menu"
-                     x-bind:style="'top: ' + ($el.previousElementSibling.getBoundingClientRect().bottom + window.scrollY + 4) + 'px; left: ' + ($el.previousElementSibling.getBoundingClientRect().left + window.scrollX) + 'px; width: ' + $el.previousElementSibling.offsetWidth + 'px'"
+                <div x-show="open" x-ref="menu" x-transition class="fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg overflow-hidden"
                      @change="{multiselect_js}">
                     <div class="p-2 border-b">
                         <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" onkeyup="filterOptions(this)">
@@ -403,10 +404,7 @@ class ColoredSelectDropdownWidget(Widget):
             try:
                 from appointments.models import Status
 
-                choices = [
-                    (obj.pk, str(obj), obj.bg_color, obj.txt_color)
-                    for obj in Status.objects.all()
-                ]
+                choices = [(obj.pk, str(obj), obj.bg_color, obj.txt_color) for obj in Status.objects.all()]
             except:
                 choices = []
 
@@ -427,11 +425,7 @@ class ColoredSelectDropdownWidget(Widget):
         selected_text_class = "text-gray-900"
 
         # Dodaj pustą opcję jeśli istnieje
-        if (
-            hasattr(self, "field")
-            and hasattr(self.field, "empty_label")
-            and self.field.empty_label
-        ):
+        if hasattr(self, "field") and hasattr(self.field, "empty_label") and self.field.empty_label:
             empty_checked = "checked" if not selected_value else ""
             if not selected_value:
                 selected_label = self.field.empty_label
@@ -479,7 +473,9 @@ class ColoredSelectDropdownWidget(Widget):
         field_id = attrs.get("id", f"id_{name}")
 
         # JavaScript dla aktualizacji tekstu
-        singleselect_js = "const radio = $el.querySelector('input[type=radio]:checked'); selectedText = radio ? radio.nextElementSibling.textContent : 'Wybierz opcję...'; open = false;"
+        singleselect_js = (
+            "const radio = $el.querySelector('input[type=radio]:checked'); selectedText = radio ? radio.nextElementSibling.textContent : 'Wybierz opcję...'; open = false;"
+        )
 
         html = f"""
             <div class="relative" id="{field_id}_container" x-data="{{ open: false, selectedText: '{selected_label}' }}" @click.outside="open = false">
@@ -489,7 +485,7 @@ class ColoredSelectDropdownWidget(Widget):
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div x-show="open" x-transition class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-hidden dropdown-menu" @change="{singleselect_js}">
+                <div x-show="open" x-transition class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg overflow-hidden dropdown-menu" @change="{singleselect_js}">
                     <div class="p-2 border-b">
                         <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" onkeyup="filterOptions(this)">
                     </div>
@@ -506,7 +502,7 @@ class ColoredSelectDropdownWidget(Widget):
 class SingleSelectDropdownWidget(Widget):
     """Custom widget dla single select dropdown z radio buttonami i automatycznym wykrywaniem kolorów"""
 
-    def __init__(self, choices=(), attrs=None, add_url=None, add_label='+ Dodaj'):
+    def __init__(self, choices=(), attrs=None, add_url=None, add_label="+ Dodaj"):
         super().__init__(attrs)
         self.choices = choices
         self.default_add_url = add_url
@@ -528,10 +524,10 @@ class SingleSelectDropdownWidget(Widget):
 
         selected_value = self.format_value(value)
         ui_colors = get_ui_colors()
-        
+
         # Pobierz data-add-url i data-add-label z attrs lub użyj domyślnych
-        add_url = attrs.pop('data-add-url', None) or self.default_add_url
-        add_label = attrs.pop('data-add-label', None) or self.default_add_label
+        add_url = attrs.pop("data-add-url", None) or self.default_add_url
+        add_label = attrs.pop("data-add-label", None) or self.default_add_label
 
         # Pobierz choices z widget lub z bound field
         choices = getattr(self, "choices", [])
@@ -543,11 +539,7 @@ class SingleSelectDropdownWidget(Widget):
         selected_label = "Wybierz opcję..."
 
         # Dodaj pustą opcję jeśli istnieje
-        if (
-            hasattr(self, "field")
-            and hasattr(self.field, "empty_label")
-            and self.field.empty_label
-        ):
+        if hasattr(self, "field") and hasattr(self.field, "empty_label") and self.field.empty_label:
             empty_checked = "checked" if not selected_value else ""
             if not selected_value:
                 selected_label = self.field.empty_label
@@ -573,7 +565,7 @@ class SingleSelectDropdownWidget(Widget):
                     <span class="text-xs">{option_label}</span>
                 </label>
             '''
-        
+
         # Dodaj przycisk "Dodaj" jeśli jest add_url
         add_button_html = ""
         if add_url:
@@ -592,11 +584,13 @@ class SingleSelectDropdownWidget(Widget):
         field_id = attrs.get("id", f"id_{name}")
 
         # JavaScript dla aktualizacji tekstu
-        singleselect_js = "const radio = $el.querySelector('input[type=radio]:checked'); selectedText = radio ? radio.nextElementSibling.textContent : 'Wybierz opcję...'; open = false;"
+        singleselect_js = (
+            "const radio = $el.querySelector('input[type=radio]:checked'); selectedText = radio ? radio.nextElementSibling.textContent : 'Wybierz opcję...'; open = false;"
+        )
 
         html = f"""
-            <div class="relative" id="{field_id}_container" x-data="{{ 
-                open: false, 
+            <div class="relative" id="{field_id}_container" x-data="{{
+                open: false,
                 selectedText: '{selected_label}',
                 updatePosition() {{
                     if (this.open) {{
@@ -615,7 +609,7 @@ class SingleSelectDropdownWidget(Widget):
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div x-show="open" x-ref="menu" x-transition class="fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-hidden"
+                <div x-show="open" x-ref="menu" x-transition class="fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg overflow-hidden"
                      @change="{singleselect_js}">
                     <div class="p-2 border-b">
                         <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" onkeyup="filterOptions(this)">
@@ -737,7 +731,7 @@ class ActiveStatusDropdownWidget(Widget):
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div x-show="open" x-transition class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-hidden dropdown-menu" @change="{singleselect_js}">
+                <div x-show="open" x-transition class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg overflow-hidden dropdown-menu" @change="{singleselect_js}">
                     <div class="max-h-48 overflow-y-auto">
                         {options_html}
                     </div>
@@ -753,9 +747,7 @@ class TextInputWidget(forms.TextInput):
 
     def __init__(self, attrs=None):
         ui_colors = get_ui_colors()
-        default_attrs = {
-            "class": f"w-full px-3 py-1 text-xs bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-{ui_colors['primary_ring']}"
-        }
+        default_attrs = {"class": f"w-full px-3 py-1 text-xs bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-{ui_colors['primary_ring']}"}
         if attrs:
             default_attrs.update(attrs)
         super().__init__(attrs=default_attrs)
@@ -768,7 +760,7 @@ class TextareaWidget(forms.Textarea):
         ui_colors = get_ui_colors()
         default_attrs = {
             "class": f"w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-{ui_colors['primary_ring']}",
-            "rows": 4
+            "rows": 4,
         }
         if attrs:
             default_attrs.update(attrs)
