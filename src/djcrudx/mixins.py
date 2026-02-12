@@ -12,7 +12,7 @@ def add_base_template_context(context):
     return context
 
 
-def render_with_readonly(request, template_name, context, readonly_fields=None, inline_config=None):
+def render_with_readonly(request, template_name, context, readonly_fields=None, inline_config=None, extra_scripts=None):
     """
     Universal render function for forms with automatic features
     
@@ -22,6 +22,7 @@ def render_with_readonly(request, template_name, context, readonly_fields=None, 
         context: Template context
         readonly_fields: List of readonly field names
         inline_config: List of inline formset configurations
+        extra_scripts: Custom JavaScript code (inline or external file)
         
     Example:
         # Simple form
@@ -46,9 +47,17 @@ def render_with_readonly(request, template_name, context, readonly_fields=None, 
         return render_with_readonly(request, 'crud/form_view.html', context,
                                    readonly_fields=['created_at'],
                                    inline_config=inline_config)
+        
+        # Form with custom JavaScript
+        return render_with_readonly(request, 'crud/form_view.html', context,
+                                   extra_scripts='<script>console.log("Custom");</script>')
     """
     # Add base template
     context = add_base_template_context(context)
+    
+    # Add extra scripts if provided
+    if extra_scripts:
+        context['extra_scripts'] = extra_scripts
     
     # Handle readonly fields
     if readonly_fields and "form" in context:

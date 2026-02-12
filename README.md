@@ -145,6 +145,7 @@ from djcrudx.widgets import (
     DateTimePickerWidget,
     DateRangePickerWidget,
     TextInputWidget,
+    TextareaWidget,
 )
 
 class ProductForm(forms.ModelForm):
@@ -157,6 +158,8 @@ class ProductForm(forms.ModelForm):
             'status': ColoredSelectDropdownWidget(),        # Colored options
             'created_at': DateTimePickerWidget(),           # DateTime picker
             'name': TextInputWidget(attrs={'placeholder': 'Product name'}),
+            'description': TextareaWidget(),                # Textarea
+            'notes': TextareaWidget(attrs={'rows': 6}),     # Textarea with custom rows
         }
 ```
 
@@ -361,6 +364,7 @@ LANGUAGE_CODE = 'pl'  # Automatic Polish translations
 - **DateRangePickerWidget** - Date range picker for filters
 - **ActiveStatusDropdownWidget** - Boolean field with red background for "No"
 - **TextInputWidget** - Styled text input
+- **TextareaWidget** - Styled textarea with full width
 
 ## 📊 Table Features
 
@@ -401,6 +405,19 @@ return render_with_readonly(request, 'crud/form_view.html', context,
 return render_with_readonly(request, 'crud/form_view.html', context,
                            readonly_fields=['created_at'],
                            inline_config=inline_config)
+
+# Form with custom JavaScript
+return render_with_readonly(request, 'crud/form_view.html', context,
+                           extra_scripts='''
+                               <script>
+                                   console.log('Custom script loaded');
+                                   // Your custom JavaScript here
+                               </script>
+                           ''')
+
+# Form with external script file
+return render_with_readonly(request, 'crud/form_view.html', context,
+                           extra_scripts='<script src="{% static "js/custom.js" %}"></script>')
 ```
 
 ### CrudListMixin - Universal List Handler
@@ -736,6 +753,7 @@ If you prefer to use your own Tailwind CSS setup, you can override the base temp
 - ✅ **Responsive design** - Tailwind CSS + Alpine.js
 - ✅ **Polish translations** - Built-in i18n support
 - ✅ **One template for everything** - `crud/form_view.html` handles all cases
+- ✅ **Custom scripts support** - Add inline or external JavaScript via `extra_scripts`
 
 ## 📝 License
 
