@@ -3,6 +3,8 @@ from django.shortcuts import render
 from django.apps import apps
 from django.conf import settings
 from django.forms import inlineformset_factory
+from django.template import Template, Context
+from django.templatetags.static import static
 
 
 def add_base_template_context(context):
@@ -83,7 +85,15 @@ def render_with_readonly(request, template_name, context, readonly_fields=None, 
     
     # Add extra scripts if provided
     if extra_scripts:
-        context['extra_scripts'] = extra_scripts
+        if extra_scripts.strip().startswith('<script'):
+            # Already formatted script tag - use as is
+            context['extra_scripts'] = extra_scripts
+        elif extra_scripts.strip().endswith('.js'):
+            # Static file path - render with static tag
+            context['extra_scripts'] = f'<script src="{static(extra_scripts)}"></script>'
+        else:
+            # Inline JavaScript code - wrap in script tags
+            context['extra_scripts'] = f'<script>{extra_scripts}</script>'
     
     # Handle readonly fields
     if readonly_fields and "form" in context:

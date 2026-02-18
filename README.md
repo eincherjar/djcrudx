@@ -89,7 +89,8 @@ def product_list(request):
     
     context.update({
         "page_title": "Products",
-        "create_url": "app:product_create"
+        "create_url": "app:product_create",
+        "extra_scripts": "js/product_list.js"  # Optional: custom JS for list view
     })
     
     return render(request, "crud/list_view.html", context)
@@ -406,18 +407,17 @@ return render_with_readonly(request, 'crud/form_view.html', context,
                            readonly_fields=['created_at'],
                            inline_config=inline_config)
 
-# Form with custom JavaScript
+# Form with inline JavaScript code
 return render_with_readonly(request, 'crud/form_view.html', context,
-                           extra_scripts='''
-                               <script>
-                                   console.log('Custom script loaded');
-                                   // Your custom JavaScript here
-                               </script>
-                           ''')
+                           extra_scripts='console.log("Loaded"); alert("Hello");')
 
-# Form with external script file
+# Form with static file - automatic {% static %} handling
 return render_with_readonly(request, 'crud/form_view.html', context,
-                           extra_scripts='<script src="{% static "js/custom.js" %}"></script>')
+                           extra_scripts='js/custom_field_modal.js')
+
+# Form with full script tag (complete control)
+return render_with_readonly(request, 'crud/form_view.html', context,
+                           extra_scripts='<script src="/static/js/custom.js"></script>')
 ```
 
 ### CrudListMixin - Universal List Handler
@@ -431,6 +431,9 @@ def product_list(request):
     context = mixin.get_datatable_context(
         queryset, filter_instance, table_config, request
     )
+    context.update({
+        "extra_scripts": "js/custom_list.js"  # Optional: add custom JS
+    })
     return render(request, "crud/list_view.html", context)
 ```
 
