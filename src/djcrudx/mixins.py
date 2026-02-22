@@ -218,6 +218,17 @@ class PaginationMixin:
         paginator = Paginator(queryset, per_page)
         page_number = request.GET.get("page")
         page_obj = paginator.get_page(page_number)
+        
+        # Build query string preserving existing params
+        from urllib.parse import urlencode
+        query_params = request.GET.copy()
+        query_params.pop('page', None)  # Remove page for base_url
+        base_url = f"{request.path}?{urlencode(query_params)}&" if query_params else f"{request.path}?"
+        
+        query_params_per_page = request.GET.copy()
+        query_params_per_page.pop('per_page', None)  # Remove per_page
+        query_params_per_page.pop('page', None)  # Remove page
+        per_page_base_url = f"{request.path}?{urlencode(query_params_per_page)}&" if query_params_per_page else f"{request.path}?"
 
         pagination_context = {
             "page_obj": page_obj,
@@ -227,8 +238,8 @@ class PaginationMixin:
             "start_index": page_obj.start_index() if page_obj.object_list else 0,
             "end_index": page_obj.end_index() if page_obj.object_list else 0,
             "total_count": paginator.count,
-            "base_url": f"{request.path}?",
-            "per_page_base_url": f"{request.path}?",
+            "base_url": base_url,
+            "per_page_base_url": per_page_base_url,
         }
 
         return page_obj, pagination_context
