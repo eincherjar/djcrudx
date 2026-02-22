@@ -229,6 +229,9 @@ class PaginationMixin:
         query_params_per_page.pop('per_page', None)  # Remove per_page
         query_params_per_page.pop('page', None)  # Remove page
         per_page_base_url = f"{request.path}?{urlencode(query_params_per_page)}&" if query_params_per_page else f"{request.path}?"
+        
+        # Generate page range for pagination
+        page_range = self._get_page_range(page_obj, paginator)
 
         pagination_context = {
             "page_obj": page_obj,
@@ -240,9 +243,26 @@ class PaginationMixin:
             "total_count": paginator.count,
             "base_url": base_url,
             "per_page_base_url": per_page_base_url,
+            "page_range": page_range,
         }
 
         return page_obj, pagination_context
+    
+    def _get_page_range(self, page_obj, paginator):
+        """Generate smart page range with ellipsis"""
+        current = page_obj.number
+        total = paginator.num_pages
+        
+        if total <= 7:
+            return list(range(1, total + 1))
+        
+        if current <= 4:
+            return list(range(1, 6)) + ['...', total]
+        
+        if current >= total - 3:
+            return [1, '...'] + list(range(total - 4, total + 1))
+        
+        return [1, '...'] + list(range(current - 1, current + 2)) + ['...', total]
 
 
 class DataTableMixin:
