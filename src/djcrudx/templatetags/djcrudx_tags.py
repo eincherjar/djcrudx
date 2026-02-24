@@ -19,3 +19,8 @@ def blocktrans(text, **kwargs):
     """Uniwersalne tłumaczenie z parametrami"""
     translated = smart_translate(text)
     return translated.format(**kwargs)
+
+@register.filter
+def call_with(func, arg):
+    """Call a function with an argument"""
+    return func(arg) if callable(func) else func
