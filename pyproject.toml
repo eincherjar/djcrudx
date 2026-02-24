@@ -4,13 +4,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "djcrudx"
-version = "0.1.0"
+version = "0.1.1"
 description = "Universal Django CRUD library with advanced widgets and features"
 readme = "README.md"
-license = {text = "MIT"}
-authors = [
-    {name = "DjCrudX Team", email = "contact@djcrudx.com"}
-]
+license = { text = "MIT" }
+authors = [{ name = "DjCrudX Team", email = "contact@djcrudx.com" }]
 keywords = ["django", "crud", "widgets", "forms", "admin"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -32,15 +30,12 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 requires-python = ">=3.8"
-dependencies = [
-    "Django>=4.0",
-    "django-filter>=22.0",
-]
+dependencies = ["Django>=4.0", "django-filter>=22.0"]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0",
-    "pytest-django>=4.5", 
+    "pytest-django>=4.5",
     "black>=22.0",
     "flake8>=5.0",
     "build>=0.8",
@@ -57,16 +52,12 @@ Documentation = "https://github.com/djcrudx/djcrudx#readme"
 packages = ["src/djcrudx"]
 
 [tool.hatch.build.targets.sdist]
-include = [
-    "/src",
-    "/README.md",
-    "/LICENSE",
-]
+include = ["/src", "/README.md", "/LICENSE"]
 
 [dependency-groups]
 dev = [
     "pytest>=7.0",
-    "pytest-django>=4.5", 
+    "pytest-django>=4.5",
     "black>=22.0",
     "flake8>=5.0",
     "build>=0.8",
