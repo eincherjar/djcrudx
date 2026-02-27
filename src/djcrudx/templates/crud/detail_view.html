@@ -74,7 +74,7 @@
                         </a>
                         {% endwith %}
                         {% else %}
-                        {{ value|default:"-"|safe }}
+                        {% autoescape off %}{{ value|default:"-" }}{% endautoescape %}
                         {% endif %}
                         {% endwith %}
                         {% endif %}
