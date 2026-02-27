@@ -5,87 +5,85 @@
 
 {% block content %}
 <div class="p-4 flex-1 flex flex-col min-w-0">
-    <div class="flex-1 p-6 bg-white min-w-0 overflow-hidden flex flex-col">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-semibold">{{ page_title|default:"Detail" }}</h1>
-            <div class="flex gap-2">
-                {% if edit_url %}
-                <a href="{% url edit_url pk=object.pk %}"
-                    class="px-3 py-1.5 bg-{{ ui_colors.primary }} hover:bg-{{ ui_colors.primary_hover }} text-white text-xs rounded transition ease-in-out duration-200 flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="size-4">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                        <path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
-                        <path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" />
-                        <path d="M16 5l3 3" />
-                    </svg>
-                    <span>{% trans "Edit" %}</span>
-                </a>
-                {% endif %}
-                {% if back_url %}
-                <a href="{% url back_url %}"
-                    class="px-3 py-1.5 bg-{{ ui_colors.secondary }} hover:bg-{{ ui_colors.secondary_hover }} text-white text-xs rounded transition ease-in-out duration-200 flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="size-4">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                        <path d="M5 12l14 0" />
-                        <path d="M5 12l6 6" />
-                        <path d="M5 12l6 -6" />
-                    </svg>
-                    <span>{% trans "Back" %}</span>
-                </a>
-                {% endif %}
-            </div>
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-semibold">{{ page_title|default:"Detail" }}</h1>
+        <div class="flex gap-2">
+            {% if edit_url %}
+            <a href="{% url edit_url pk=object.pk %}"
+                class="px-3 py-1.5 bg-{{ ui_colors.primary }} hover:bg-{{ ui_colors.primary_hover }} text-white text-xs rounded transition ease-in-out duration-200 flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="size-4">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
+                    <path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" />
+                    <path d="M16 5l3 3" />
+                </svg>
+                <span>{% trans "Edit" %}</span>
+            </a>
+            {% endif %}
+            {% if back_url %}
+            <a href="{% url back_url %}"
+                class="px-3 py-1.5 bg-{{ ui_colors.secondary }} hover:bg-{{ ui_colors.secondary_hover }} text-white text-xs rounded transition ease-in-out duration-200 flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="size-4">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M5 12l14 0" />
+                    <path d="M5 12l6 6" />
+                    <path d="M5 12l6 -6" />
+                </svg>
+                <span>{% trans "Back" %}</span>
+            </a>
+            {% endif %}
         </div>
-
-        <!-- Detail sections -->
-        {% for section in detail_sections %}
-        <fieldset class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4">
-            <legend class="text-lg font-medium px-2 text-gray-700">{{ section.title }}</legend>
-            <div class="grid grid-cols-1 md:grid-cols-{{ section.columns|default:3 }} gap-4">
-                {% for field_name in section.fields %}
-                {% for config in detail_config %}
-                {% if config.field == field_name %}
-                <div class="space-y-1">
-                    <dt class="text-sm font-medium text-gray-500">{{ config.label }}</dt>
-                    <dd class="text-sm text-gray-900">
-                        {% if config.is_badge %}
-                        <div class="flex flex-wrap gap-2">
-                            {% with badges=config.badge_data|call_with:object %}
-                            {% for badge in badges %}
-                            <span
-                                class="inline-flex items-center px-2 py-1 rounded text-xs bg-{{ badge.background_color }} text-{{ badge.text_color }}">
-                                {{ badge.name }}
-                            </span>
-                            {% empty %}
-                            <span class="text-gray-500">-</span>
-                            {% endfor %}
-                            {% endwith %}
-                        </div>
-                        {% else %}
-                        {% with value=config.value|call_with:object %}
-                        {% if config.url %}
-                        {% with url_data=config.url|call_with:object %}
-                        <a href="{% url url_data.0 pk=url_data.1.pk %}" class="text-blue-600 hover:text-blue-800">
-                            {{ value }}
-                        </a>
-                        {% endwith %}
-                        {% else %}
-                        {{ value|default:"-"|safe }}
-                        {% endif %}
-                        {% endwith %}
-                        {% endif %}
-                    </dd>
-                </div>
-                {% endif %}
-                {% endfor %}
-                {% endfor %}
-            </div>
-        </fieldset>
-        {% endfor %}
     </div>
+
+    <!-- Detail sections -->
+    {% for section in detail_sections %}
+    <fieldset class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4">
+        <legend class="text-lg font-medium px-2 text-gray-700">{{ section.title }}</legend>
+        <div class="grid grid-cols-1 md:grid-cols-{{ section.columns|default:3 }} gap-4">
+            {% for field_name in section.fields %}
+            {% for config in detail_config %}
+            {% if config.field == field_name %}
+            <div class="space-y-1">
+                <dt class="text-sm font-medium text-gray-500">{{ config.label }}</dt>
+                <dd class="text-sm text-gray-900">
+                    {% if config.is_badge %}
+                    <div class="flex flex-wrap gap-2">
+                        {% with badges=config.badge_data|call_with:object %}
+                        {% for badge in badges %}
+                        <span
+                            class="inline-flex items-center px-2 py-1 rounded text-xs bg-{{ badge.background_color }} text-{{ badge.text_color }}">
+                            {{ badge.name }}
+                        </span>
+                        {% empty %}
+                        <span class="text-gray-500">-</span>
+                        {% endfor %}
+                        {% endwith %}
+                    </div>
+                    {% else %}
+                    {% with value=config.value|call_with:object %}
+                    {% if config.url %}
+                    {% with url_data=config.url|call_with:object %}
+                    <a href="{% url url_data.0 pk=url_data.1.pk %}" class="text-blue-600 hover:text-blue-800">
+                        {{ value }}
+                    </a>
+                    {% endwith %}
+                    {% else %}
+                    {{ value|default:"-"|safe }}
+                    {% endif %}
+                    {% endwith %}
+                    {% endif %}
+                </dd>
+            </div>
+            {% endif %}
+            {% endfor %}
+            {% endfor %}
+        </div>
+    </fieldset>
+    {% endfor %}
 </div>
 {% endblock %}
