@@ -69,13 +69,12 @@
                         {% with value=config.value|call_with:object %}
                         {% if config.url %}
                         {% with url_data=config.url|call_with:object %}
-                        <a href="{% url url_data.0 pk=url_data.1.pk %}"
-                            class="text-blue-600 hover:text-blue-800">
+                        <a href="{% url url_data.0 pk=url_data.1.pk %}" class="text-blue-600 hover:text-blue-800">
                             {{ value }}
                         </a>
                         {% endwith %}
                         {% else %}
-                        {{ value|default:"-" }}
+                        {{ value|default:"-"|safe }}
                         {% endif %}
                         {% endwith %}
                         {% endif %}
