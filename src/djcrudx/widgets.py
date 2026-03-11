@@ -243,8 +243,8 @@ class MultiSelectDropdownWidget(Widget):
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div x-ref="menu" x-teleport="body" x-transition :class="open ? 'fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg overflow-hidden block' : 'fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg overflow-hidden hidden'"
-                     @change="{multiselect_js}">
+                <div x-ref="menu" x-teleport="body" x-show="open" x-transition class="fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg overflow-hidden"
+                     @change="{multiselect_js}" style="display: none;">
                     <div class="p-2 border-b">
                         <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" 
                                @keyup="const search = $el.value.toLowerCase(); $el.closest('div').nextElementSibling.querySelectorAll('label').forEach(l => l.style.display = l.textContent.toLowerCase().includes(search) ? '' : 'none')">
@@ -627,8 +627,8 @@ class SingleSelectDropdownWidget(Widget):
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div x-ref="menu" x-teleport="body" x-transition :class="open ? 'fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg overflow-hidden block' : 'fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg overflow-hidden hidden'"
-                     @change="{singleselect_js}">
+                <div x-ref="menu" x-teleport="body" x-show="open" x-transition class="fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg overflow-hidden"
+                     @change="{singleselect_js}" style="display: none;">
                     <div class="p-2 border-b">
                         <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" 
                                @keyup="const search = $el.value.toLowerCase(); $el.closest('div').nextElementSibling.querySelectorAll('label').forEach(l => l.style.display = l.textContent.toLowerCase().includes(search) ? '' : 'none')">
