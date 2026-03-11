@@ -243,7 +243,7 @@ class MultiSelectDropdownWidget(Widget):
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div x-show="open" x-ref="menu" x-transition class="fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg overflow-hidden" style="display: none;"
+                <div x-ref="menu" x-transition :class="open ? 'block' : 'hidden'" class="fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg overflow-hidden"
                      @change="{multiselect_js}">
                     <div class="p-2 border-b">
                         <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" 
@@ -627,7 +627,7 @@ class SingleSelectDropdownWidget(Widget):
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div x-show="open" x-ref="menu" x-transition class="fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg overflow-hidden" style="display: none;"
+                <div x-ref="menu" x-transition :class="open ? 'block' : 'hidden'" class="fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg overflow-hidden"
                      @change="{singleselect_js}">
                     <div class="p-2 border-b">
                         <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" 
