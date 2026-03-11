@@ -215,14 +215,28 @@ class MultiSelectDropdownWidget(Widget):
         multiselect_js = "const checkboxes = $el.querySelectorAll('input[type=checkbox]:checked'); const labels = Array.from(checkboxes).map(cb => cb.nextElementSibling.textContent); if (labels.length === 0) { selectedText = 'Wybierz opcje...'; } else if (labels.join(', ').length > 30) { selectedText = labels.length + ' wybranych'; } else { selectedText = labels.join(', '); }"
 
         html = f"""
-            <div class="relative" id="{field_id}_container" x-data="{{ open: false, selectedText: '{display_text}' }}" @click.outside="open = false">
-                <button type="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-{ui_colors["primary_ring"]} flex items-center justify-between gap-2" @click="open = !open">
+            <div class="relative" id="{field_id}_container" x-data="{{ 
+                open: false, 
+                selectedText: '{display_text}',
+                openAbove: false,
+                toggle() {{
+                    this.open = !this.open;
+                    if (this.open) {{
+                        this.$nextTick(() => {{
+                            const rect = this.$refs.button.getBoundingClientRect();
+                            const spaceBelow = window.innerHeight - rect.bottom;
+                            this.openAbove = spaceBelow < 300;
+                        }});
+                    }}
+                }}
+            }}" @click.outside="open = false">
+                <button type="button" x-ref="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-{ui_colors["primary_ring"]} flex items-center justify-between gap-2" @click="toggle()">
                     <span class="truncate text-xs" x-text="selectedText">{display_text}</span>
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div x-show="open" x-transition class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg overflow-hidden dropdown-menu"
+                <div x-show="open" x-transition :class="openAbove ? 'bottom-full mb-1' : 'top-full mt-1'" class="absolute z-50 w-full bg-white border border-gray-300 rounded shadow-lg overflow-hidden dropdown-menu"
                      @change="{multiselect_js}">
                     <div class="p-2 border-b">
                         <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" 
@@ -578,14 +592,28 @@ class SingleSelectDropdownWidget(Widget):
         )
 
         html = f"""
-            <div class="relative" id="{field_id}_container" x-data="{{ open: false, selectedText: '{selected_label}' }}" @click.outside="open = false">
-                <button type="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-{ui_colors["primary_ring"]} flex items-center justify-between gap-2" @click="open = !open">
+            <div class="relative" id="{field_id}_container" x-data="{{ 
+                open: false, 
+                selectedText: '{selected_label}',
+                openAbove: false,
+                toggle() {{
+                    this.open = !this.open;
+                    if (this.open) {{
+                        this.$nextTick(() => {{
+                            const rect = this.$refs.button.getBoundingClientRect();
+                            const spaceBelow = window.innerHeight - rect.bottom;
+                            this.openAbove = spaceBelow < 300;
+                        }});
+                    }}
+                }}
+            }}" @click.outside="open = false">
+                <button type="button" x-ref="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-{ui_colors["primary_ring"]} flex items-center justify-between gap-2" @click="toggle()">
                     <span class="truncate text-xs" x-text="selectedText">{selected_label}</span>
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div x-show="open" x-transition class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg overflow-hidden dropdown-menu"
+                <div x-show="open" x-transition :class="openAbove ? 'bottom-full mb-1' : 'top-full mt-1'" class="absolute z-50 w-full bg-white border border-gray-300 rounded shadow-lg overflow-hidden dropdown-menu"
                      @change="{singleselect_js}">
                     <div class="p-2 border-b">
                         <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" 
