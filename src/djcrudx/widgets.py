@@ -223,7 +223,15 @@ class MultiSelectDropdownWidget(Widget):
                         const btn = this.$refs.button;
                         const menu = this.$refs.menu;
                         const rect = btn.getBoundingClientRect();
-                        menu.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+                        const spaceBelow = window.innerHeight - rect.bottom;
+                        const spaceAbove = rect.top;
+                        const menuHeight = 280;
+                        
+                        if (spaceBelow < menuHeight && spaceAbove > spaceBelow) {{
+                            menu.style.top = (rect.top + window.scrollY - menuHeight - 4) + 'px';
+                        }} else {{
+                            menu.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+                        }}
                         menu.style.left = (rect.left + window.scrollX) + 'px';
                         menu.style.width = rect.width + 'px';
                     }}
@@ -238,7 +246,8 @@ class MultiSelectDropdownWidget(Widget):
                 <div x-show="open" x-ref="menu" x-transition class="fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg overflow-hidden"
                      @change="{multiselect_js}">
                     <div class="p-2 border-b">
-                        <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" onkeyup="filterOptions(this)">
+                        <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" 
+                               @keyup="const search = $el.value.toLowerCase(); $el.closest('div').nextElementSibling.querySelectorAll('label').forEach(l => l.style.display = l.textContent.toLowerCase().includes(search) ? '' : 'none')">
                     </div>
                     <div class="max-h-48 overflow-y-auto">
                         {options_html}
@@ -487,7 +496,8 @@ class ColoredSelectDropdownWidget(Widget):
                 </button>
                 <div x-show="open" x-transition class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg overflow-hidden dropdown-menu" @change="{singleselect_js}">
                     <div class="p-2 border-b">
-                        <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" onkeyup="filterOptions(this)">
+                        <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" 
+                               @keyup="const search = $el.value.toLowerCase(); $el.closest('div').nextElementSibling.querySelectorAll('label').forEach(l => l.style.display = l.textContent.toLowerCase().includes(search) ? '' : 'none')">
                     </div>
                     <div class="max-h-48 overflow-y-auto">
                         {options_html}
@@ -597,7 +607,15 @@ class SingleSelectDropdownWidget(Widget):
                         const btn = this.$refs.button;
                         const menu = this.$refs.menu;
                         const rect = btn.getBoundingClientRect();
-                        menu.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+                        const spaceBelow = window.innerHeight - rect.bottom;
+                        const spaceAbove = rect.top;
+                        const menuHeight = 280;
+                        
+                        if (spaceBelow < menuHeight && spaceAbove > spaceBelow) {{
+                            menu.style.top = (rect.top + window.scrollY - menuHeight - 4) + 'px';
+                        }} else {{
+                            menu.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+                        }}
                         menu.style.left = (rect.left + window.scrollX) + 'px';
                         menu.style.width = rect.width + 'px';
                     }}
@@ -612,7 +630,8 @@ class SingleSelectDropdownWidget(Widget):
                 <div x-show="open" x-ref="menu" x-transition class="fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg overflow-hidden"
                      @change="{singleselect_js}">
                     <div class="p-2 border-b">
-                        <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" onkeyup="filterOptions(this)">
+                        <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" 
+                               @keyup="const search = $el.value.toLowerCase(); $el.closest('div').nextElementSibling.querySelectorAll('label').forEach(l => l.style.display = l.textContent.toLowerCase().includes(search) ? '' : 'none')">
                     </div>
                     <div class="max-h-48 overflow-y-auto">
                         {options_html}
