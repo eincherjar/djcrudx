@@ -215,36 +215,15 @@ class MultiSelectDropdownWidget(Widget):
         multiselect_js = "const checkboxes = $el.querySelectorAll('input[type=checkbox]:checked'); const labels = Array.from(checkboxes).map(cb => cb.nextElementSibling.textContent); if (labels.length === 0) { selectedText = 'Wybierz opcje...'; } else if (labels.join(', ').length > 30) { selectedText = labels.length + ' wybranych'; } else { selectedText = labels.join(', '); }"
 
         html = f"""
-            <div class="relative" id="{field_id}_container" x-data="{{
-                open: false,
-                selectedText: '{display_text}',
-                updatePosition() {{
-                    if (this.open) {{
-                        const btn = this.$refs.button;
-                        const menu = this.$refs.menu;
-                        const rect = btn.getBoundingClientRect();
-                        const spaceBelow = window.innerHeight - rect.bottom;
-                        const spaceAbove = rect.top;
-                        const menuHeight = 280;
-                        
-                        if (spaceBelow < menuHeight && spaceAbove > spaceBelow) {{
-                            menu.style.top = (rect.top + window.scrollY - menuHeight - 4) + 'px';
-                        }} else {{
-                            menu.style.top = (rect.bottom + window.scrollY + 4) + 'px';
-                        }}
-                        menu.style.left = (rect.left + window.scrollX) + 'px';
-                        menu.style.width = rect.width + 'px';
-                    }}
-                }}
-            }}" @click.outside="open = false">
-                <button type="button" x-ref="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-{ui_colors["primary_ring"]} flex items-center justify-between gap-2" @click="open = !open; $nextTick(() => updatePosition())">
+            <div class="relative" id="{field_id}_container" x-data="{{ open: false, selectedText: '{display_text}' }}" @click.outside="open = false">
+                <button type="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-{ui_colors["primary_ring"]} flex items-center justify-between gap-2" @click="open = !open">
                     <span class="truncate text-xs" x-text="selectedText">{display_text}</span>
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div x-ref="menu" x-teleport="body" x-show="open" x-transition class="fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg overflow-hidden"
-                     @change="{multiselect_js}" style="display: none;">
+                <div x-show="open" x-transition class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg overflow-hidden dropdown-menu"
+                     @change="{multiselect_js}">
                     <div class="p-2 border-b">
                         <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" 
                                @keyup="const search = $el.value.toLowerCase(); $el.closest('div').nextElementSibling.querySelectorAll('label').forEach(l => l.style.display = l.textContent.toLowerCase().includes(search) ? '' : 'none')">
@@ -599,36 +578,15 @@ class SingleSelectDropdownWidget(Widget):
         )
 
         html = f"""
-            <div class="relative" id="{field_id}_container" x-data="{{
-                open: false,
-                selectedText: '{selected_label}',
-                updatePosition() {{
-                    if (this.open) {{
-                        const btn = this.$refs.button;
-                        const menu = this.$refs.menu;
-                        const rect = btn.getBoundingClientRect();
-                        const spaceBelow = window.innerHeight - rect.bottom;
-                        const spaceAbove = rect.top;
-                        const menuHeight = 280;
-                        
-                        if (spaceBelow < menuHeight && spaceAbove > spaceBelow) {{
-                            menu.style.top = (rect.top + window.scrollY - menuHeight - 4) + 'px';
-                        }} else {{
-                            menu.style.top = (rect.bottom + window.scrollY + 4) + 'px';
-                        }}
-                        menu.style.left = (rect.left + window.scrollX) + 'px';
-                        menu.style.width = rect.width + 'px';
-                    }}
-                }}
-            }}" @click.outside="open = false">
-                <button type="button" x-ref="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-{ui_colors["primary_ring"]} flex items-center justify-between gap-2" @click="open = !open; $nextTick(() => updatePosition())">
+            <div class="relative" id="{field_id}_container" x-data="{{ open: false, selectedText: '{selected_label}' }}" @click.outside="open = false">
+                <button type="button" class="w-full px-3 py-1 text-left bg-white border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-{ui_colors["primary_ring"]} flex items-center justify-between gap-2" @click="open = !open">
                     <span class="truncate text-xs" x-text="selectedText">{selected_label}</span>
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div x-ref="menu" x-teleport="body" x-show="open" x-transition class="fixed z-[9999] bg-white border border-gray-300 rounded shadow-lg overflow-hidden"
-                     @change="{singleselect_js}" style="display: none;">
+                <div x-show="open" x-transition class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg overflow-hidden dropdown-menu"
+                     @change="{singleselect_js}">
                     <div class="p-2 border-b">
                         <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" 
                                @keyup="const search = $el.value.toLowerCase(); $el.closest('div').nextElementSibling.querySelectorAll('label').forEach(l => l.style.display = l.textContent.toLowerCase().includes(search) ? '' : 'none')">
