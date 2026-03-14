@@ -149,7 +149,9 @@ class MultiSelectDropdownWidget(Widget):
 
     def value_from_datadict(self, data, files, name):
         """Pobierz wartości z danych formularza"""
-        return data.getlist(name)
+        if hasattr(data, 'getlist'):
+            return data.getlist(name)
+        return data.get(name, [])
 
     def render(self, name, value, attrs=None, renderer=None):
         if attrs is None:
