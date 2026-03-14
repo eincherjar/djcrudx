@@ -192,16 +192,22 @@ class MultiSelectDropdownWidget(Widget):
             '''
 
         # Dodaj przycisk "Dodaj" jeśli jest add_url
-        add_button_html = ""
         if add_url:
             add_button_html = f'''
-                <div class="p-2 border-t">
+                <div class="p-2 border-t flex flex-col gap-1">
                     <a href="{add_url}" target="_blank" class="flex items-center justify-center gap-1 px-3 py-1.5 text-xs bg-green-500 text-white rounded hover:bg-green-600">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
                         <span>{add_label}</span>
                     </a>
+                    <button type="button" @click="open = false; applyFilters()" class="w-full px-3 py-1.5 text-xs bg-orange-400 text-white rounded hover:bg-orange-500">Zastosuj</button>
+                </div>
+            '''
+        else:
+            add_button_html = '''
+                <div class="p-2 border-t">
+                    <button type="button" @click="open = false; applyFilters()" class="w-full px-3 py-1.5 text-xs bg-orange-400 text-white rounded hover:bg-orange-500">Zastosuj</button>
                 </div>
             '''
 
