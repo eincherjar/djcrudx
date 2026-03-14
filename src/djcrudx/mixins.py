@@ -22,7 +22,7 @@ def render_with_readonly(request, template_name, context, readonly_fields=None, 
         request: HttpRequest
         template_name: Template path
         context: Template context
-        readonly_fields: List of readonly field names
+        readonly_fields: List of readonly field names or True for all fields
         inline_config: List of inline formset configurations
         extra_scripts: Custom JavaScript code (inline or external file)
         
@@ -33,6 +33,10 @@ def render_with_readonly(request, template_name, context, readonly_fields=None, 
         # Form with readonly fields
         return render_with_readonly(request, 'crud/form_view.html', context, 
                                    readonly_fields=['created_at', 'id'])
+        
+        # Form with all fields readonly
+        return render_with_readonly(request, 'crud/form_view.html', context, 
+                                   readonly_fields=True)
         
         # Form with inline formsets
         return render_with_readonly(request, 'crud/form_view.html', context,
@@ -95,10 +99,22 @@ def render_with_readonly(request, template_name, context, readonly_fields=None, 
             # Inline JavaScript code - wrap in script tags
             context['extra_scripts'] = f'<script>{extra_scripts}</script>'
     
-    # Handle readonly fields
-    if readonly_fields and "form" in context:
+    # Handle readonly - check if context has readonly=True
+    if context.get('readonly') is True and "form" in context:
         form = context["form"]
-        if hasattr(form, "instance") and form.instance and form.instance.pk:
+        # Make all fields readonly
+        for field_name in form.fields:
+            form.fields[field_name].disabled = True
+        context["readonly_mode"] = True
+    # Handle readonly fields
+    elif readonly_fields and "form" in context:
+        form = context["form"]
+        if readonly_fields is True:
+            # Make all fields readonly
+            for field_name in form.fields:
+                form.fields[field_name].disabled = True
+            context["readonly_mode"] = True
+        elif hasattr(form, "instance") and form.instance and form.instance.pk:
             apply_readonly_fields(form, readonly_fields)
             context["readonly_fields"] = readonly_fields
     
