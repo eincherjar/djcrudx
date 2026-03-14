@@ -355,6 +355,33 @@
         }
     </script>
 
+    <script>
+        // Przepozycjonuj dropdown-menu na fixed przy otwarciu żeby nie był ucinany przez overflow:hidden
+        document.addEventListener('click', function(e) {
+            const button = e.target.closest('[x-ref="button"], button');
+            if (!button) return;
+            const container = button.closest('[x-data]');
+            if (!container) return;
+            const menu = container.querySelector('.dropdown-menu');
+            if (!menu) return;
+            requestAnimationFrame(() => {
+                if (menu.offsetParent === null) return; // ukryty
+                const rect = button.getBoundingClientRect();
+                menu.style.position = 'fixed';
+                menu.style.width = rect.width + 'px';
+                menu.style.left = rect.left + 'px';
+                const spaceBelow = window.innerHeight - rect.bottom;
+                if (spaceBelow < 300) {
+                    menu.style.top = '';
+                    menu.style.bottom = (window.innerHeight - rect.top) + 'px';
+                } else {
+                    menu.style.bottom = '';
+                    menu.style.top = rect.bottom + 'px';
+                }
+            });
+        });
+    </script>
+
     <!-- Table -->
     <div class="flex-1 flex flex-col">
         <div id="tableContainer"
