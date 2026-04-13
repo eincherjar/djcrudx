@@ -185,7 +185,7 @@ class MultiSelectDropdownWidget(Widget):
 
             checked = "checked" if is_selected else ""
             options_html += f'''
-                <label class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer" @mousedown.prevent="const input = $el.querySelector('input'); if (input) {{ input.checked = !input.checked; input.dispatchEvent(new Event('change', {{ bubbles: true }})); }}">
+                <label class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer" @click.prevent="const input = $el.querySelector('input'); if (input) {{ input.checked = !input.checked; input.dispatchEvent(new Event('change', {{ bubbles: true }})); }}">
                     <input type="checkbox" name="{name}" value="{option_value}" {checked}>
                     <span class="text-xs">{option_label}</span>
                 </label>
@@ -440,7 +440,7 @@ class ColoredSelectDropdownWidget(Widget):
             if not selected_value:
                 selected_label = self.field.empty_label
             options_html += f'''
-                <label class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer" @mousedown.prevent="const input = $el.querySelector('input'); if (input) {{ input.checked = true; input.dispatchEvent(new Event('change', {{ bubbles: true }})); }}">
+                <label class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer" @click.prevent="const input = $el.querySelector('input'); if (input) {{ input.checked = true; input.dispatchEvent(new Event('change', {{ bubbles: true }})); }}">
                     <input type="radio" name="{name}" value="" {empty_checked}>
                     <span class="text-xs">{self.field.empty_label}</span>
                 </label>
@@ -571,7 +571,7 @@ class SingleSelectDropdownWidget(Widget):
 
             checked = "checked" if is_selected else ""
             options_html += f'''
-                <label class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer" @mousedown.prevent="const input = $el.querySelector('input'); if (input) {{ input.checked = true; input.dispatchEvent(new Event('change', {{ bubbles: true }})); }}">
+                <label class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer" @click.prevent="const input = $el.querySelector('input'); if (input) {{ input.checked = true; input.dispatchEvent(new Event('change', {{ bubbles: true }})); }}">
                     <input type="radio" name="{name}" value="{option_value}" {checked}>
                     <span class="text-xs">{option_label}</span>
                 </label>
