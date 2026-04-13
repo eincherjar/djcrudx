@@ -149,7 +149,7 @@ class MultiSelectDropdownWidget(Widget):
 
     def value_from_datadict(self, data, files, name):
         """Pobierz wartości z danych formularza"""
-        if hasattr(data, 'getlist'):
+        if hasattr(data, "getlist"):
             return data.getlist(name)
         return data.get(name, [])
 
@@ -185,7 +185,7 @@ class MultiSelectDropdownWidget(Widget):
 
             checked = "checked" if is_selected else ""
             options_html += f'''
-                <label class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer">
+                <label class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer" @mousedown.prevent="const input = $el.querySelector('input'); if (input) {{ input.checked = !input.checked; input.dispatchEvent(new Event('change', {{ bubbles: true }})); }}">
                     <input type="checkbox" name="{name}" value="{option_value}" {checked}>
                     <span class="text-xs">{option_label}</span>
                 </label>
@@ -205,11 +205,11 @@ class MultiSelectDropdownWidget(Widget):
                 </div>
             '''
         else:
-            add_button_html = '''
+            add_button_html = """
                 <div class="p-2 border-t">
                     <button type="button" @click="open = false; applyFilters()" class="w-full px-3 py-1.5 text-xs bg-orange-400 text-white rounded hover:bg-orange-500">Zastosuj</button>
                 </div>
-            '''
+            """
 
         # Tekst wyświetlany w dropdown
         display_text = ", ".join(selected_labels) if selected_labels else "Wybierz opcje..."
@@ -223,8 +223,8 @@ class MultiSelectDropdownWidget(Widget):
         multiselect_js = "const checkboxes = $el.querySelectorAll('input[type=checkbox]:checked'); const labels = Array.from(checkboxes).map(cb => cb.nextElementSibling.textContent); if (labels.length === 0) { selectedText = 'Wybierz opcje...'; } else if (labels.join(', ').length > 30) { selectedText = labels.length + ' wybranych'; } else { selectedText = labels.join(', '); }"
 
         html = f"""
-            <div class="relative" id="{field_id}_container" x-data="{{ 
-                open: false, 
+            <div class="relative" id="{field_id}_container" x-data="{{
+                open: false,
                 selectedText: '{display_text}',
                 openAbove: false,
                 toggle() {{
@@ -247,7 +247,7 @@ class MultiSelectDropdownWidget(Widget):
                 <div x-show="open" x-transition :class="openAbove ? 'bottom-full mb-1' : 'top-full mt-1'" class="absolute z-50 w-full bg-white border border-gray-300 rounded shadow-lg overflow-hidden dropdown-menu"
                      @change="{multiselect_js}">
                     <div class="p-2 border-b">
-                        <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" 
+                        <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                                @keyup="const search = $el.value.toLowerCase(); $el.closest('div').nextElementSibling.querySelectorAll('label').forEach(l => l.style.display = l.textContent.toLowerCase().includes(search) ? '' : 'none')">
                     </div>
                     <div class="max-h-48 overflow-y-auto">
@@ -440,7 +440,7 @@ class ColoredSelectDropdownWidget(Widget):
             if not selected_value:
                 selected_label = self.field.empty_label
             options_html += f'''
-                <label class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer">
+                <label class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer" @mousedown.prevent="const input = $el.querySelector('input'); if (input) {{ input.checked = true; input.dispatchEvent(new Event('change', {{ bubbles: true }})); }}">
                     <input type="radio" name="{name}" value="" {empty_checked}>
                     <span class="text-xs">{self.field.empty_label}</span>
                 </label>
@@ -468,7 +468,7 @@ class ColoredSelectDropdownWidget(Widget):
             bg_class = f"bg-[{bg_color}]"
             text_class = f"text-[{txt_color}]"
             options_html += f'''
-                <label class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer">
+                <label class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer" @mousedown.prevent="const input = $el.querySelector('input'); if (input) {{ input.checked = true; input.dispatchEvent(new Event('change', {{ bubbles: true }})); }}">
                     <input type="radio" name="{name}" value="{option_value}" {checked}>
                     <span class="text-xs px-2 py-1 rounded {bg_class} {text_class}">{option_label}</span>
                 </label>
@@ -497,7 +497,7 @@ class ColoredSelectDropdownWidget(Widget):
                 </button>
                 <div x-show="open" x-transition class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg overflow-hidden dropdown-menu" @change="{singleselect_js}">
                     <div class="p-2 border-b">
-                        <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" 
+                        <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                                @keyup="const search = $el.value.toLowerCase(); $el.closest('div').nextElementSibling.querySelectorAll('label').forEach(l => l.style.display = l.textContent.toLowerCase().includes(search) ? '' : 'none')">
                     </div>
                     <div class="max-h-48 overflow-y-auto">
@@ -555,7 +555,7 @@ class SingleSelectDropdownWidget(Widget):
             if not selected_value:
                 selected_label = self.field.empty_label
             options_html += f'''
-                <label class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer">
+                <label class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer" @mousedown.prevent="const input = $el.querySelector('input'); if (input) {{ input.checked = true; input.dispatchEvent(new Event('change', {{ bubbles: true }})); }}">
                     <input type="radio" name="{name}" value="" {empty_checked}>
                     <span class="text-xs">{self.field.empty_label}</span>
                 </label>
@@ -571,7 +571,7 @@ class SingleSelectDropdownWidget(Widget):
 
             checked = "checked" if is_selected else ""
             options_html += f'''
-                <label class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer">
+                <label class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer" @mousedown.prevent="const input = $el.querySelector('input'); if (input) {{ input.checked = true; input.dispatchEvent(new Event('change', {{ bubbles: true }})); }}">
                     <input type="radio" name="{name}" value="{option_value}" {checked}>
                     <span class="text-xs">{option_label}</span>
                 </label>
@@ -600,8 +600,8 @@ class SingleSelectDropdownWidget(Widget):
         )
 
         html = f"""
-            <div class="relative" id="{field_id}_container" x-data="{{ 
-                open: false, 
+            <div class="relative" id="{field_id}_container" x-data="{{
+                open: false,
                 selectedText: '{selected_label}',
                 openAbove: false,
                 toggle() {{
@@ -624,7 +624,7 @@ class SingleSelectDropdownWidget(Widget):
                 <div x-show="open" x-transition :class="openAbove ? 'bottom-full mb-1' : 'top-full mt-1'" class="absolute z-50 w-full bg-white border border-gray-300 rounded shadow-lg overflow-hidden dropdown-menu"
                      @change="{singleselect_js}">
                     <div class="p-2 border-b">
-                        <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded" 
+                        <input type="text" placeholder="Szukaj..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                                @keyup="const search = $el.value.toLowerCase(); $el.closest('div').nextElementSibling.querySelectorAll('label').forEach(l => l.style.display = l.textContent.toLowerCase().includes(search) ? '' : 'none')">
                     </div>
                     <div class="max-h-48 overflow-y-auto">
@@ -811,5 +811,4 @@ class SecretInputWidget(Widget):
                 </button>
             </div>
         '''
-
         return mark_safe(html)
