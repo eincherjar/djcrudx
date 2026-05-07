@@ -233,7 +233,7 @@ class MultiSelectDropdownWidget(Widget):
                         this.$nextTick(() => {{
                             const rect = this.$refs.button.getBoundingClientRect();
                             const spaceBelow = window.innerHeight - rect.bottom;
-                            this.openAbove = spaceBelow < 300;
+                            this.openAbove = (window.innerHeight - rect.bottom) < rect.top;
                         }});
                     }}
                 }}
@@ -610,7 +610,7 @@ class SingleSelectDropdownWidget(Widget):
                         this.$nextTick(() => {{
                             const rect = this.$refs.button.getBoundingClientRect();
                             const spaceBelow = window.innerHeight - rect.bottom;
-                            this.openAbove = spaceBelow < 300;
+                            this.openAbove = (window.innerHeight - rect.bottom) < rect.top;
                         }});
                     }}
                 }}
